@@ -13,6 +13,11 @@ app.get("/", (req, res) => {
   res.send("Hello");//Respond "Hello" when a GET request is made to the homepage
 });
 
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
+
 app.get ("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
