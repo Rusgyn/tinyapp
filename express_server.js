@@ -9,6 +9,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.use(express.urlencoded({ extended: true }));//Express's built-in middleware function urlencoded will convert the request body from a Buffer into string that we can read
+
 app.get("/", (req, res) => {
   res.send("Hello");//Respond "Hello" when a GET request is made to the homepage
 });
