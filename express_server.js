@@ -18,11 +18,17 @@ app.get("/urls", (req, res) => {//new route handler for /urls
   res.render("urls_index", templateVars);//use res.render() to pass the URL data (urlDatabase) to urls_index.ejs template.
 });
 
-// Additional route with route parameter
+//GET route to show the form
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");//render the urls_new template to present the form to the user.
+})
+
+// Route with route parameter
 app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is a route parameter.
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);//use res.render() to pass the URL data to urls_show template.
 });
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
