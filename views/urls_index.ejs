@@ -22,7 +22,7 @@
     <header>
       <%- include('partials/_header'); %>
     </header>
-    
+
     <main style="margin: 1em;">
       <h3>My URLs</h3>
       <table class="table">
@@ -35,7 +35,7 @@
         <tbody>
           <% for (let id in urls) { %>
             <tr>
-              <td><%= id %></td>
+              <td><a href="/u/<%= id %>" target="_blank"><%= id %></a></td>
               <td><%= urls[id] %></td>
             </tr>
           <% } %>
