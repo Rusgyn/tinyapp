@@ -1,11 +1,11 @@
-const crypto = require("crypto");//Import the crypto library
+const crypto = require("crypto");
 
 //This function will generate random string, and will be used as our new urlDatabase key.
 function generateRandomString(length) {
   return crypto.randomUUID().split('-')[0].slice(0, length);
 }
 
-const express = require("express");// Import the express library
+const express = require("express");
 const app = express();// Define our app as an instance of express
 const PORT = 8080;
 
@@ -47,8 +47,8 @@ app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is 
 
 //Shorter version of redirect link
 app.get("/u/:id", (req, res) => {
-  const newProp = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  const longURL = newProp.longURL;
+  const templateVars  = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const longURL = templateVars .longURL;
 
   if (longURL === "" || longURL === undefined) {
     res.sendStatus(404);//404, The requested resource could not be found
