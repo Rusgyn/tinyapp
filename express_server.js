@@ -1,17 +1,17 @@
-const crypto = require("crypto");
+const crypto = require("crypto");//Import the crypto library
 
 //This function will generate random string, and will be used as our new urlDatabase key.
 function generateRandomString(length) {
-  return crypto.randomUUID().split('-')[0].slice(0, length)
+  return crypto.randomUUID().split('-')[0].slice(0, length);
 }
 
 const express = require("express");// Import the express library
 const app = express();// Define our app as an instance of express
-const PORT = 8080; //default port 8080
+const PORT = 8080;
 
 app.set("view engine", "ejs");//This tells the Express app to use EJS as its templating engine.
 
-app.use(express.urlencoded({ extended: true }));//Express's built-in middleware function urlencoded will convert the request body from a Buffer into string that we can read. It will then add the data to the req(request) object under the key body
+app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -34,11 +34,8 @@ app.get("/urls/new", (req, res) => {
 
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
   let newKey = generateRandomString(6);
   urlDatabase[newKey] = req.body.longURL;//Add new key:value pair to urlDatabase after clicking submit.
-  console.log(urlDatabase);
-  // res.redirect(req.body.longURL);
   res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
@@ -53,14 +50,12 @@ app.get("/u/:id", (req, res) => {
   const newProp = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   const longURL = newProp.longURL;
 
-  if (longURL === "" || longURL === undefined || longURL === "") {
-    res.sendStatus(404);//status code, The requested resource could not be found but may be available in the future.
+  if (longURL === "" || longURL === undefined) {
+    res.sendStatus(404);//404, The requested resource could not be found
   } else {
-    console.log("\nThe new longURL is: ", longURL);//log the value of longURL
     res.redirect(longURL);
   }
 });
-
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
