@@ -1,18 +1,9 @@
-let randomString = "";
+const crypto = require("crypto");
 
 //This function will generate random string, and will be used as our new urlDatabase key.
 function generateRandomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    randomString += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return randomString;
+  return crypto.randomUUID().split('-')[0].slice(0, length)
 }
-generateRandomString(6);
-
 
 const express = require("express");// Import the express library
 const app = express();// Define our app as an instance of express
@@ -44,18 +35,11 @@ app.get("/urls/new", (req, res) => {
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  urlDatabase[randomString] = req.body.longURL;//Add new key:value pair to urlDatabase after clicking submit.
+  let newKey = generateRandomString(6);
+  urlDatabase[newKey] = req.body.longURL;//Add new key:value pair to urlDatabase after clicking submit.
   console.log(urlDatabase);
   // res.redirect(req.body.longURL);
-  res.redirect(`/u/${randomString}`); //redirect to new route, using the random generated id as the route parameter.
-});
-
-//Shorter version of redirect link
-app.get("/u/:id", (req, res) => {
-  const newProp = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  const longURL = newProp.longURL;
-  console.log("\nThe new longURL is: ", longURL);//log the long URL to the console.
-  res.redirect(longURL);//redirect to the long url derived from our urlDatabase
+  res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
 // Route with route parameter
@@ -63,6 +47,20 @@ app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is 
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);//use res.render() to pass the URL data to urls_show template.
 });
+
+//Shorter version of redirect link
+app.get("/u/:id", (req, res) => {
+  const newProp = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const longURL = newProp.longURL;
+
+  if (longURL === "" || longURL === undefined || longURL === "") {
+    res.sendStatus(404);//status code, The requested resource could not be found but may be available in the future.
+  } else {
+    console.log("\nThe new longURL is: ", longURL);//log the value of longURL
+    res.redirect(longURL);
+  }
+});
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
