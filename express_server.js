@@ -39,10 +39,9 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
-//Route that removed a URL resource.
+//Route that removed a URL resource. Delete.
 app.post("/urls/:id/delete", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  delete urlDatabase[templateVars.id];
+  delete urlDatabase[req.params.id];
   res.redirect('/urls');//Client will be redirected to this page once delete is done.
 });
 
