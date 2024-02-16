@@ -39,6 +39,13 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
+//Route that removed a URL resource.
+app.post("/urls/:id/delete", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  delete urlDatabase[templateVars.id];
+  res.redirect('/urls');//Client will be redirected to this page once delete is done.
+});
+
 // Route with route parameter
 app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is a route parameter.
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
@@ -48,7 +55,7 @@ app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is 
 //Shorter version of redirect link
 app.get("/u/:id", (req, res) => {
   const templateVars  = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  const longURL = templateVars .longURL;
+  const longURL = templateVars.longURL;
 
   if (longURL === "" || longURL === undefined) {
     res.sendStatus(404);//404, The requested resource could not be found
