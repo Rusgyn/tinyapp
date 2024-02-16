@@ -18,7 +18,6 @@
   </head>
 
   <body>
-
     <%- include('partials/_header') %>
 
     <main style="margin: 1em;">
@@ -28,18 +27,27 @@
           <tr>
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th>
+            <th scope="col">Delete</th>
           </tr>
         </thead>
+
         <tbody>
           <% for (let id in urls) { %>
+            <form method="POST" action="/urls/<%= id%>/delete"> 
             <tr>
+              
               <td><a href="/u/<%= id %>" target="_blank"><%= id %></a></td>
-              <td><%= urls[id] %></td>
+          
+              <td><%= urls[id] %></td> <!-- longURL -->
+              <td><button type="submit">Delete</button></td>
             </tr>
-          <% } %>
+            </form>
+        <% } %>  
         </tbody>
+        
       </table>
     </main>
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
