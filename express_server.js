@@ -57,13 +57,11 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
-//Route that will update he value of stored longURL.
+//Route that will update the value of stored longURL.
 app.post("/urls/:id", (req, res) => {
-  let id = req.params.id
-  urlDatabase[id] = req.body.longURL
-  
+  urlDatabase[req.params.id] = req.body.longURL;
   res.redirect(`/urls`);
-})
+});
 
 //Route that removed a URL resource. Delete.
 app.post("/urls/:id/delete", (req, res) => {
