@@ -27,22 +27,9 @@ app.get("/urls", (req, res) => {//new route handler for /urls
   res.render("urls_index", templateVars);//use res.render() to pass the URL data (urlDatabase) to urls_index.ejs template.
 });
 
-//GET route to show the form
+//GET route to create new URL
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");//render the urls_new template to present the form to the user.
-});
-
-//POST route to receive the form submission.
-app.post("/urls", (req, res) => {
-  let newKey = generateRandomString(6);
-  urlDatabase[newKey] = req.body.longURL;//Add new key:value pair to urlDatabase after clicking submit.
-  res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
-});
-
-//Route that removed a URL resource. Delete.
-app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect('/urls');//Client will be redirected to this page once delete is done.
 });
 
 // Route with route parameter
@@ -61,6 +48,27 @@ app.get("/u/:id", (req, res) => {
   } else {
     res.redirect(longURL);
   }
+});
+
+//POST route to receive the form submission.
+app.post("/urls", (req, res) => {
+  let newKey = generateRandomString(6);
+  urlDatabase[newKey] = req.body.longURL;//Add new key:value pair to urlDatabase after clicking submit.
+  res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
+});
+
+//Route that will update he value of stored longURL.
+app.post("/urls/:id", (req, res) => {
+  let id = req.params.id
+  urlDatabase[id] = req.body.longURL
+  
+  res.redirect(`/urls`);
+})
+
+//Route that removed a URL resource. Delete.
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect('/urls');//Client will be redirected to this page once delete is done.
 });
 
 app.get("/urls.json", (req, res) => {
