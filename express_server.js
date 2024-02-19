@@ -52,21 +52,38 @@ app.get("/u/:id", (req, res) => {
 
   if (longURL === "" || longURL === undefined) {
     res.sendStatus(404);//404, The requested resource could not be found
-  } else {
-    res.redirect(longURL);
   }
+
+  res.redirect(longURL);
+
 });
 
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
   let newKey = generateRandomString(6);
-  urlDatabase[newKey] = req.body.longURL;//Add new key:value pair to urlDatabase after clicking submit.
+  //function that will check HTTP or HTTPS protocol
+  const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
+
+  if (req.body.longURL === "" || req.body.longURL === undefined) {
+    urlDatabase[newKey] = req.body.longURL;
+  } else {
+    urlDatabase[newKey] = withHttp(req.body.longURL);//Add new key:value pair to urlDatabase after clicking submit.
+  }
+  
   res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
 //Route that will update the value of stored longURL.
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  //function that will check HTTP or HTTPS protocol
+  const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
+  
+  if (req.body.longURL === "" || req.body.longURL === undefined) {
+    urlDatabase[req.params.id] = req.body.longURL;
+  } else {
+    urlDatabase[req.params.id] = withHttp(req.body.longURL);
+  }
+
   res.redirect(`/urls`);
 });
 
