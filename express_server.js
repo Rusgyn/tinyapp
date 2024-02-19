@@ -55,7 +55,6 @@ app.get("/u/:id", (req, res) => {
   }
 
   res.redirect(longURL);
-
 });
 
 //POST route to receive the form submission.
@@ -95,6 +94,11 @@ app.get("/login", (req, res) => {
   }
   //If not then they can log-in.
   res.render("/urls");
+});
+
+//GET route that register new user.
+app.get("/register", (req, res) => {
+  res.render("register");
 });
 
 //POST route that will login.
