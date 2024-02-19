@@ -72,6 +72,11 @@ app.post("/urls/:id", (req, res) => {
 
 //GET login
 app.get("/login", (req, res) => {
+  //check if the user is logged in.
+  if (req.cookie.username) {
+    return res.redirect("/urls");
+  }
+  //If not then they can log-in.
   res.render("/urls");
 });
 
@@ -79,6 +84,12 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   //save the cookie information of the user
   res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
+//POST that logouts user
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
   res.redirect("/urls");
 })
 
