@@ -63,6 +63,18 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls`);
 });
 
+//GET login
+app.get("/login", (req, res) => {
+  res.render("/urls");
+});
+
+//POST route that will login.
+app.post("/login", (req, res) => {
+  //save the cookie information of the user
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+})
+
 //Route that removed a URL resource. Delete.
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
