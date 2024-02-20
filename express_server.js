@@ -49,22 +49,24 @@ app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is 
 app.get("/u/:id", (req, res) => {
   const templateVars  = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   const longURL = templateVars.longURL;
-
-  if (longURL === "" || longURL === undefined) {
-    res.sendStatus(404);//404, The requested resource could not be found
+  //To check urlDatabase properties has the route parameter,(req.params.id).
+  const urlDBKeys = Object.keys(urlDatabase);
+  for (let key = 0; key < urlDBKeys.length; key++) {
+    if (req.params.id === urlDBKeys[key]) {
+      return res.redirect(longURL);
+    }
   }
-
-  res.redirect(longURL);
+  res.sendStatus(404);//404, The requested resource could not be found
 });
+
 
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
   let newKey = generateRandomString(6);
   //function that will check HTTP or HTTPS protocol
   const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
-
   if (req.body.longURL === "" || req.body.longURL === undefined) {
-    urlDatabase[newKey] = req.body.longURL;
+    return res.redirect("/error");
   } else {
     urlDatabase[newKey] = withHttp(req.body.longURL);//Add new key:value pair to urlDatabase after clicking submit.
   }
@@ -78,13 +80,15 @@ app.post("/urls/:id", (req, res) => {
   const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
   
   if (req.body.longURL === "" || req.body.longURL === undefined) {
-    urlDatabase[req.params.id] = req.body.longURL;
+    return res.redirect("/error");
+    //urlDatabase[req.params.id] = req.body.longURL;
   } else {
     urlDatabase[req.params.id] = withHttp(req.body.longURL);
   }
 
   res.redirect(`/urls`);
 });
+
 
 //GET login
 app.get("/login", (req, res) => {
@@ -108,6 +112,10 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+app.post("/register", (req, res) => {
+  res.send("Under Construction!");
+});
+
 //POST that logouts user
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
@@ -119,6 +127,26 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect('/urls');//Client will be redirected to this page once delete is done.
 });
+
+//============Additional: Error handling ====
+//GET route, if provided and empty URL string.
+app.get("/error", (req, res) => {
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_error", templateVars);
+});
+
+//POST route, if first attempt was an empty URL string.
+app.post("/error", (req, res) => {
+  let newKey = generateRandomString(6);
+  //function that will check HTTP or HTTPS protocol
+  const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
+  urlDatabase[newKey] = withHttp(req.body.longURL);//Add new key:value pair to urlDatabase after clicking submit.
+
+  res.redirect(`/urls/${newKey}`);
+});
+
+//==================
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
