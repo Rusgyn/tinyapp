@@ -15,9 +15,42 @@ app.set("view engine", "ejs");//This tells the Express app to use EJS as its tem
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
 app.use(cookieParser());
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+const getUser = (userId) => {
+  return users[userId];
+};
+
+const getUserByEmail = (email) => {
+  return users[email];
+};
+
+const saveUser = (email, password) => {
+  const userKey = generateRandomString(6);
+  const newUser = {
+    id: userKey,
+    email: email,
+    password: password
+  };
+  users[userKey] = newUser;
+
+  return newUser;
 };
 
 app.get("/", (req, res) => {
@@ -26,22 +59,21 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {//new route handler for /urls
   const templateVars = {
-    username: req.cookies["username"],
+    user: getUser(req.cookies["user_id"]),
     urls: urlDatabase
   };
-
   res.render("urls_index", templateVars);//use res.render() to pass the URL data (urlDatabase) to urls_index.ejs template.
 });
 
 //GET route to create new URL
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user: getUser(req.cookies["user_id"]) };
   res.render("urls_new", templateVars);//render the urls_new template to present the form to the user.
 });
 
 // Route with route parameter
 app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is a route parameter.
-  const templateVars = { username: req.cookies["username"], id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { user: getUser(req.cookies["user_id"]), id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);//use res.render() to pass the URL data to urls_show template.
 });
 
@@ -81,7 +113,6 @@ app.post("/urls/:id", (req, res) => {
   
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.redirect("/error");
-    //urlDatabase[req.params.id] = req.body.longURL;
   } else {
     urlDatabase[req.params.id] = withHttp(req.body.longURL);
   }
@@ -93,8 +124,10 @@ app.post("/urls/:id", (req, res) => {
 //GET login
 app.get("/login", (req, res) => {
   //check if the user is logged in.
-  if (req.cookie.username) {
-    return res.redirect("/urls");
+  const templateVars = { user: users };
+  console.log("GET-LOGIN templateVars: ", templateVars);
+  if (req.cookie.user_id) {
+    return res.redirect("/urls", templateVars);
   }
   //If not then they can log-in.
   res.render("/urls");
@@ -102,25 +135,33 @@ app.get("/login", (req, res) => {
 
 //GET route that register new user.
 app.get("/register", (req, res) => {
-  res.render("register");
+  const templateVars = { user: users };
+  res.render("register", templateVars);
 });
 
 //POST route that will login.
 app.post("/login", (req, res) => {
   //save the cookie information of the user
-  res.cookie("username", req.body.username);
+  const user = getUserByEmail(req.body.user_id);
+  res.cookie("user_id", user.id);
   res.redirect("/urls");
 });
 
+//POST registration route.
 app.post("/register", (req, res) => {
-  res.send("Under Construction!");
+  const newUser = saveUser(req.body.email, req.body.password);
+  console.log("POST-REGISTER users dbase: ", users);
+  console.log("POST-REGSTER newUser.id: ", newUser.id);
+  res.cookie("user_id", newUser.id);
+
+  res.redirect("/urls");
 });
 
 //POST that logouts user
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
-})
+});
 
 //Route that removed a URL resource. Delete.
 app.post("/urls/:id/delete", (req, res) => {
@@ -131,7 +172,7 @@ app.post("/urls/:id/delete", (req, res) => {
 //============Additional: Error handling ====
 //GET route, if provided and empty URL string.
 app.get("/error", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user: getUser(req.cookies["user_id"]), id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_error", templateVars);
 });
 
