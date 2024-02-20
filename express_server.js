@@ -15,6 +15,7 @@ app.set("view engine", "ejs");//This tells the Express app to use EJS as its tem
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
 app.use(cookieParser());
 
+//========== Database ========
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -33,6 +34,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//====== Helper functions =====
 const getUser = (userId) => {
   return users[userId];
 };
@@ -52,6 +54,8 @@ const saveUser = (email, password) => {
 
   return newUser;
 };
+
+//=========================
 
 app.get("/", (req, res) => {
   res.send("Hello");//Respond "Hello" when a GET request is made to the homepage
@@ -149,11 +153,22 @@ app.post("/login", (req, res) => {
 
 //POST registration route.
 app.post("/register", (req, res) => {
+  //Error Handler: Empty Email or/and password
+  if (!req.body.email || !req.body.password) {
+    console.log("POST - REgister: - EMPTY");
+    return res.sendStatus(400);
+  }
+  //Error Handler: Email already exist in users database.
+  //loop the users database object properties for comparison.
+  const usersDbKeys = Object.keys(users);
+  for (let key = 0; key < usersDbKeys.length; key++) {
+    if (req.body.email === users[usersDbKeys[key]].email) {
+      return res.sendStatus(400);
+    }
+  }
+ 
   const newUser = saveUser(req.body.email, req.body.password);
-  console.log("POST-REGISTER users dbase: ", users);
-  console.log("POST-REGSTER newUser.id: ", newUser.id);
   res.cookie("user_id", newUser.id);
-
   res.redirect("/urls");
 });
 
