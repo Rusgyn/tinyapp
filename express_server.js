@@ -1,19 +1,18 @@
 const crypto = require("crypto");
-
-//This function will generate random string, and will be used as our new urlDatabase key.
-function generateRandomString(length) {
-  return crypto.randomUUID().split('-')[0].slice(0, length);
-}
-
 const express = require("express");
 const app = express();// Define our app as an instance of express
 const PORT = 8080;
 const cookieParser = require("cookie-parser");
 
-app.set("view engine", "ejs");//This tells the Express app to use EJS as its templating engine.
+app.set("view engine", "ejs");//Tells the Express app to use EJS as its templating engine.
 
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
 app.use(cookieParser());
+
+//This function will generate random string
+function generateRandomString(length) {
+  return crypto.randomUUID().split('-')[0].slice(0, length);
+}
 
 //========== Database ========
 const users = {
@@ -35,14 +34,19 @@ const urlDatabase = {
 };
 
 //====== Helper functions =====
+//This helper function will get the user from our users dbase.
 const getUser = (userId) => {
   return users[userId];
 };
-
+//Helper function will obtain the email from our users property objects
 const getUserByEmail = (email) => {
-  return users[email];
+  //return users[email];
+  const usersDbKeys = Object.keys(users);
+  for (let key = 0; key < usersDbKeys.length; key++) {
+      return users[usersDbKeys[key]].email;
+  }
 };
-
+//Helper function that will save our newly registered user.
 const saveUser = (email, password) => {
   const userKey = generateRandomString(6);
   const newUser = {
@@ -54,7 +58,6 @@ const saveUser = (email, password) => {
 
   return newUser;
 };
-
 //=========================
 
 app.get("/", (req, res) => {
@@ -110,7 +113,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
-//Route that will update the value of stored longURL.
+//POST route that will update the value of stored longURL.
 app.post("/urls/:id", (req, res) => {
   //function that will check HTTP or HTTPS protocol
   const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
@@ -120,21 +123,12 @@ app.post("/urls/:id", (req, res) => {
   } else {
     urlDatabase[req.params.id] = withHttp(req.body.longURL);
   }
-
   res.redirect(`/urls`);
 });
 
-
-//GET login
+//GET route to login
 app.get("/login", (req, res) => {
-  //check if the user is logged in.
-  const templateVars = { user: users };
-  console.log("GET-LOGIN templateVars: ", templateVars);
-  if (req.cookie.user_id) {
-    return res.redirect("/urls", templateVars);
-  }
-  //If not then they can log-in.
-  res.render("/urls");
+  res.render("login")
 });
 
 //GET route that register new user.
@@ -146,8 +140,9 @@ app.get("/register", (req, res) => {
 //POST route that will login.
 app.post("/login", (req, res) => {
   //save the cookie information of the user
-  const user = getUserByEmail(req.body.user_id);
-  res.cookie("user_id", user.id);
+  const user = getUserByEmail(req.body.email);
+  //const existingUser = saveUser(req.body.email, req.body.password);
+  res.cookie("user_id", user);
   res.redirect("/urls");
 });
 
@@ -155,18 +150,14 @@ app.post("/login", (req, res) => {
 app.post("/register", (req, res) => {
   //Error Handler: Empty Email or/and password
   if (!req.body.email || !req.body.password) {
-    console.log("POST - REgister: - EMPTY");
-    return res.sendStatus(400);
+    return res.status(400).send('We cannot process your request, you have provided an empty email or/and password. Try registering again.');
   }
   //Error Handler: Email already exist in users database.
   //loop the users database object properties for comparison.
-  const usersDbKeys = Object.keys(users);
-  for (let key = 0; key < usersDbKeys.length; key++) {
-    if (req.body.email === users[usersDbKeys[key]].email) {
-      return res.sendStatus(400);
-    }
-  }
- 
+  if (req.body.email === getUserByEmail(req.body.email)) {
+    return res.status(400).send('A user with that email already exists, try to login instead');
+  };
+
   const newUser = saveUser(req.body.email, req.body.password);
   res.cookie("user_id", newUser.id);
   res.redirect("/urls");
@@ -181,7 +172,7 @@ app.post("/logout", (req, res) => {
 //Route that removed a URL resource. Delete.
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
-  res.redirect('/urls');//Client will be redirected to this page once delete is done.
+  res.redirect('/urls');
 });
 
 //============Additional: Error handling ====
@@ -202,7 +193,6 @@ app.post("/error", (req, res) => {
 });
 
 //==================
-
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
