@@ -53,6 +53,10 @@ const getUserByEmail = (email) => {
    }
   }
 };
+//Helper function that check the cookies if there's an active user.
+const isUserLoggedIn = (requestCookies) => {
+  return (requestCookies.user_id ? true : false)
+}
 
 //Helper function that will save our newly registered user.
 const saveUser = (email, password) => {
@@ -84,7 +88,7 @@ app.get("/urls", (req, res) => {//new route handler for /urls
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: getUser(req.cookies["user_id"]) };
 
-  if (req.cookies.user_id) {
+  if (isUserLoggedIn(req.cookies)) {
     return res.render("urls_new", templateVars);//render the urls_new template to present the form to the user.
   } 
   
@@ -115,7 +119,7 @@ app.get("/u/:id", (req, res) => {
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
 
-  if (!req.cookies.user_id) {
+  if (!isUserLoggedIn(req.cookies)) {
     return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
   }
 
@@ -134,7 +138,7 @@ app.post("/urls", (req, res) => {
 //POST route that will update the value of stored longURL.
 app.post("/urls/:id", (req, res) => {
 
-  if (!req.cookies.user_id) {
+  if (!isUserLoggedIn(req.cookies)) {
     return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
   }
 
@@ -154,7 +158,7 @@ app.post("/urls/:id", (req, res) => {
 //GET route to login
 app.get("/login", (req, res) => {
   const templateVars = { user: users };
-  if (req.cookies.user_id) {
+  if (isUserLoggedIn(req.cookies)) {
     return res.redirect("/urls");
   }
   res.render("login", templateVars);
@@ -213,7 +217,7 @@ app.post("/logout", (req, res) => {
 //Route that removed a URL resource. Delete.
 app.post("/urls/:id/delete", (req, res) => {
 
-  if (!req.cookies.user_id) {
+  if (!isUserLoggedIn(req.cookies)) {
     return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
   }
 
