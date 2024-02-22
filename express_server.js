@@ -14,7 +14,7 @@ function generateRandomString(length) {
   return crypto.randomUUID().split('-')[0].slice(0, length);
 }
 
-//========== Database ========
+//========== Define Database ========
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -26,6 +26,11 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+  test: {
+    id: "test",
+    email: "test@test.com",
+    password: "test123"
+  }
 };
 
 const urlDatabase = {
@@ -38,14 +43,30 @@ const urlDatabase = {
 const getUser = (userId) => {
   return users[userId];
 };
-//Helper function will obtain the email from our users property objects
+
+//Helper function will obtain the user from our users property objects
 const getUserByEmail = (email) => {
-  //return users[email];
-  const usersDbKeys = Object.keys(users);
-  for (let key = 0; key < usersDbKeys.length; key++) {
-      return users[usersDbKeys[key]].email;
+  let usersEmail = "";
+  for(let i in users) {
+   usersEmail = (users[i].email);
+   if (email === usersEmail) {
+    return users[i].id;
+   }
   }
 };
+
+//Helper function will obtain/check the password from our users property objects
+const getUserByPassword = (password) => {
+  let usersPassword = "";
+  for(let i in users) {
+    usersPassword= (users[i].password); //alerts key's value
+   if (password === usersPassword) {
+    console.log("The password: ", usersPassword +" is same as user: ", users[i].id)
+    return users[i].id;
+   }
+  }
+};
+
 //Helper function that will save our newly registered user.
 const saveUser = (email, password) => {
   const userKey = generateRandomString(6);
@@ -61,7 +82,7 @@ const saveUser = (email, password) => {
 //=========================
 
 app.get("/", (req, res) => {
-  res.send("Hello");//Respond "Hello" when a GET request is made to the homepage
+  res.send("Hello!");//Respond "Hello" when a GET request is made to the homepage
 });
 
 app.get("/urls", (req, res) => {//new route handler for /urls
@@ -128,7 +149,9 @@ app.post("/urls/:id", (req, res) => {
 
 //GET route to login
 app.get("/login", (req, res) => {
-  res.render("login")
+  console.log("GET OUR DBASE: ", users);
+  const templateVars = { user: users };
+  res.render("login", templateVars);
 });
 
 //GET route that register new user.
@@ -138,12 +161,17 @@ app.get("/register", (req, res) => {
 });
 
 //POST route that will login.
-app.post("/login", (req, res) => {
-  //save the cookie information of the user
-  const user = getUserByEmail(req.body.email);
-  //const existingUser = saveUser(req.body.email, req.body.password);
-  res.cookie("user_id", user);
+app.post("/login", (req, res) => {  
+  const existUser = getUserByEmail(req.body.email);
+  const existPassword = getUserByPassword(req.body.password);
+
+  if (!existUser || !existPassword) {
+    return res.status(403).send('You have entered an invalid username or password');
+  }
+
+  res.cookie("user_id", existUser);
   res.redirect("/urls");
+
 });
 
 //POST registration route.
@@ -152,12 +180,12 @@ app.post("/register", (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send('We cannot process your request, you have provided an empty email or/and password. Try registering again.');
   }
-  //Error Handler: Email already exist in users database.
-  //loop the users database object properties for comparison.
-  if (req.body.email === getUserByEmail(req.body.email)) {
+  //To check if user email already exist.
+  const existUser = getUserByEmail(req.body.email);
+  if (existUser) {
     return res.status(400).send('A user with that email already exists, try to login instead');
-  };
-
+  }
+  //save new user info to the dbase.
   const newUser = saveUser(req.body.email, req.body.password);
   res.cookie("user_id", newUser.id);
   res.redirect("/urls");
@@ -166,7 +194,7 @@ app.post("/register", (req, res) => {
 //POST that logouts user
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 //Route that removed a URL resource. Delete.
