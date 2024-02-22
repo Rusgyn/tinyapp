@@ -1,82 +1,34 @@
-const crypto = require("crypto");
 const express = require("express");
 const app = express();// Define our app as an instance of express
 const PORT = 8080;
 const cookieParser = require("cookie-parser");
 
+//Import Database using module
+const {
+  users,
+  urlDatabase
+} = require("./helper_functions/database");
+
+//Import functions using module
+const {
+  generateRandomString,
+  getUser,
+  getUserByEmail,
+  saveUser,
+  isUserLoggedIn
+} = require("./helper_functions/helper_functions");
+
 app.set("view engine", "ejs");//Tells the Express app to use EJS as its templating engine.
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
 app.use(cookieParser());
 
-//This function will generate random string
-function generateRandomString(length) {
-  return crypto.randomUUID().split('-')[0].slice(0, length);
-}
-
-//========== Define Database ========
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-  test: {
-    id: "test",
-    email: "test@test.com",
-    password: "test123"
-  }
-};
-
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-
-//====== Helper functions =====
-//This helper function will get the user from our users dbase.
-const getUser = (userId) => {
-  return users[userId];
-};
-
-//Helper function will obtain the user from our users property objects
-const getUserByEmail = (email) => {
-  let usersEmail = "";
-  for(let i in users) {
-   usersEmail = (users[i].email);
-   if (email === usersEmail) {
-    return users[i];
-   }
-  }
-};
-//Helper function that check the cookies if there's an active user.
-const isUserLoggedIn = (requestCookies) => {
-  return (requestCookies.user_id ? true : false)
-}
-
-//Helper function that will save our newly registered user.
-const saveUser = (email, password) => {
-  const userKey = generateRandomString(6);
-  const newUser = {
-    id: userKey,
-    email: email,
-    password: password
-  };
-  users[userKey] = newUser;
-
-  return newUser;
-};
-//=========================
-
+//GET route to homepage
 app.get("/", (req, res) => {
   res.send("Hello!");//Respond "Hello" when a GET request is made to the homepage
 });
 
-app.get("/urls", (req, res) => {//new route handler for /urls
+//GET route for URLS, define URLS data will.
+app.get("/urls", (req, res) => {
   const templateVars = {
     user: getUser(req.cookies["user_id"]),
     urls: urlDatabase
@@ -90,7 +42,7 @@ app.get("/urls/new", (req, res) => {
 
   if (isUserLoggedIn(req.cookies)) {
     return res.render("urls_new", templateVars);//render the urls_new template to present the form to the user.
-  } 
+  }
   
   res.redirect("/login");
 });
@@ -114,7 +66,6 @@ app.get("/u/:id", (req, res) => {
   }
   res.send("<html><body>The requested resource could not be found.</html>\n");
 });
-
 
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
@@ -167,14 +118,14 @@ app.get("/login", (req, res) => {
 //GET route that register new user.
 app.get("/register", (req, res) => {
   const templateVars = { user: users };
-  if (req.cookies.user_id) {
+  if (isUserLoggedIn(req.cookies)) {
     return res.redirect("/urls");
   }
   res.render("register", templateVars);
 });
 
 //POST route that will login.
-app.post("/login", (req, res) => {  
+app.post("/login", (req, res) => {
   const existUser = getUserByEmail(req.body.email);
 
   if (existUser) {
@@ -225,7 +176,7 @@ app.post("/urls/:id/delete", (req, res) => {
   return res.redirect('/urls');
 });
 
-//============Additional: Error handling ====
+//======== ADDITIONAL: Error handling ========
 //GET route, if provided and empty URL string.
 app.get("/error", (req, res) => {
   const templateVars = { user: getUser(req.cookies["user_id"]), id: req.params.id, longURL: urlDatabase[req.params.id] };
@@ -241,8 +192,7 @@ app.post("/error", (req, res) => {
 
   res.redirect(`/urls/${newKey}`);
 });
-
-//==================
+//================================
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
