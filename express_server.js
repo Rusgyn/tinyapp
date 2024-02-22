@@ -5,7 +5,6 @@ const PORT = 8080;
 const cookieParser = require("cookie-parser");
 
 app.set("view engine", "ejs");//Tells the Express app to use EJS as its templating engine.
-
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
 app.use(cookieParser());
 
@@ -50,19 +49,7 @@ const getUserByEmail = (email) => {
   for(let i in users) {
    usersEmail = (users[i].email);
    if (email === usersEmail) {
-    return users[i].id;
-   }
-  }
-};
-
-//Helper function will obtain/check the password from our users property objects
-const getUserByPassword = (password) => {
-  let usersPassword = "";
-  for(let i in users) {
-    usersPassword= (users[i].password); //alerts key's value
-   if (password === usersPassword) {
-    console.log("The password: ", usersPassword +" is same as user: ", users[i].id)
-    return users[i].id;
+    return users[i];
    }
   }
 };
@@ -96,7 +83,12 @@ app.get("/urls", (req, res) => {//new route handler for /urls
 //GET route to create new URL
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: getUser(req.cookies["user_id"]) };
-  res.render("urls_new", templateVars);//render the urls_new template to present the form to the user.
+
+  if (req.cookies.user_id) {
+    return res.render("urls_new", templateVars);//render the urls_new template to present the form to the user.
+  } 
+  
+  res.redirect("/login");
 });
 
 // Route with route parameter
@@ -116,12 +108,17 @@ app.get("/u/:id", (req, res) => {
       return res.redirect(longURL);
     }
   }
-  res.sendStatus(404);//404, The requested resource could not be found
+  res.send("<html><body>The requested resource could not be found.</html>\n");
 });
 
 
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
+
+  if (!req.cookies.user_id) {
+    return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
+  }
+
   let newKey = generateRandomString(6);
   //function that will check HTTP or HTTPS protocol
   const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
@@ -136,6 +133,11 @@ app.post("/urls", (req, res) => {
 
 //POST route that will update the value of stored longURL.
 app.post("/urls/:id", (req, res) => {
+
+  if (!req.cookies.user_id) {
+    return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
+  }
+
   //function that will check HTTP or HTTPS protocol
   const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
   
@@ -144,38 +146,49 @@ app.post("/urls/:id", (req, res) => {
   } else {
     urlDatabase[req.params.id] = withHttp(req.body.longURL);
   }
-  res.redirect(`/urls`);
+
+  return res.redirect(`/urls`);
+
 });
 
 //GET route to login
 app.get("/login", (req, res) => {
-  console.log("GET OUR DBASE: ", users);
   const templateVars = { user: users };
+  if (req.cookies.user_id) {
+    return res.redirect("/urls");
+  }
   res.render("login", templateVars);
 });
 
 //GET route that register new user.
 app.get("/register", (req, res) => {
   const templateVars = { user: users };
+  if (req.cookies.user_id) {
+    return res.redirect("/urls");
+  }
   res.render("register", templateVars);
 });
 
 //POST route that will login.
 app.post("/login", (req, res) => {  
   const existUser = getUserByEmail(req.body.email);
-  const existPassword = getUserByPassword(req.body.password);
 
-  if (!existUser || !existPassword) {
+  if (existUser) {
+    if (existUser.password === req.body.password) {
+      res.cookie("user_id", existUser.id);
+      return res.redirect("/urls");
+    } else {
+      return res.status(403).send('You have entered an invalid username or password');
+    }
+  } else {
     return res.status(403).send('You have entered an invalid username or password');
   }
-
-  res.cookie("user_id", existUser);
-  res.redirect("/urls");
 
 });
 
 //POST registration route.
 app.post("/register", (req, res) => {
+
   //Error Handler: Empty Email or/and password
   if (!req.body.email || !req.body.password) {
     return res.status(400).send('We cannot process your request, you have provided an empty email or/and password. Try registering again.');
@@ -199,8 +212,13 @@ app.post("/logout", (req, res) => {
 
 //Route that removed a URL resource. Delete.
 app.post("/urls/:id/delete", (req, res) => {
+
+  if (!req.cookies.user_id) {
+    return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
+  }
+
   delete urlDatabase[req.params.id];
-  res.redirect('/urls');
+  return res.redirect('/urls');
 });
 
 //============Additional: Error handling ====
