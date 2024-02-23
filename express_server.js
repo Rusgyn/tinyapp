@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();// Define our app as an instance of express
 const PORT = 8080;
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 
 //Import Database using module
 const {
@@ -17,6 +18,7 @@ const {
   saveUser,
   urlsForUser,
   checkLoggedInUser,
+  isPasswordMatch,
   isUserLoggedIn
 } = require("./helper_functions/helper_functions");
 
@@ -160,7 +162,7 @@ app.post("/login", (req, res) => {
   const existUser = getUserByEmail(req.body.email);
 
   if (existUser) {
-    if (existUser.password === req.body.password) {
+    if (isPasswordMatch(req.body.password, existUser.password)) {
       res.cookie("user_id", existUser.id);
       return res.redirect("/urls");
     } else {
@@ -169,12 +171,10 @@ app.post("/login", (req, res) => {
   } else {
     return res.status(403).send('You have entered an invalid username or password');
   }
-
 });
 
 //POST registration route.
 app.post("/register", (req, res) => {
-
   //Error Handler: Empty Email or/and password
   if (!req.body.email || !req.body.password) {
     return res.status(400).send('We cannot process your request, you have provided an empty email or/and password. Try registering again.');

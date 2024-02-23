@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 
 //This function will generate random string
 function generateRandomString(length) {
@@ -32,13 +33,17 @@ const saveUser = (email, password) => {
   const newUser = {
     id: generateRandomString(6),
     email: email,
-    password: password
+    password: bcrypt.hashSync(password, 10)
   };
 
   users[newUser.id] = newUser;
 
   return newUser;
 };
+
+const isPasswordMatch = (password, hashedPassword) => {
+  return bcrypt.compareSync(password, hashedPassword); // returns true
+}
 
 //Helper function that check the cookies if there's an active user.
 const isUserLoggedIn = (requestCookies) => {
@@ -70,5 +75,6 @@ module.exports = {
   saveUser,
   urlsForUser,
   checkLoggedInUser,
+  isPasswordMatch,
   isUserLoggedIn
 }
