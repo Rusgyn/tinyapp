@@ -18,7 +18,6 @@ const {
   saveUser,
   urlsForUser,
   checkLoggedInUser,
-  isPasswordMatch,
   isUserLoggedIn
 } = require("./helper_functions/helper_functions");
 
@@ -162,7 +161,7 @@ app.post("/login", (req, res) => {
   const existUser = getUserByEmail(req.body.email);
 
   if (existUser) {
-    if (isPasswordMatch(req.body.password, existUser.password)) {
+    if (bcrypt.compareSync(req.body.password, existUser.password)) {
       res.cookie("user_id", existUser.id);
       return res.redirect("/urls");
     } else {
@@ -185,7 +184,8 @@ app.post("/register", (req, res) => {
     return res.status(400).send('A user with that email already exists, try to login instead');
   }
   //save new user info to the dbase.
-  const newUser = saveUser(req.body.email, req.body.password);
+  const password = bcrypt.hashSync(req.body.password, 10)
+  const newUser = saveUser(req.body.email, password);
 
   res.cookie("user_id", newUser.id);
   res.redirect("/urls");
