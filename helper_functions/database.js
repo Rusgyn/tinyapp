@@ -20,11 +20,11 @@ const users = {
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "45bd00",
+    userID: "userRandomID",
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "45bd00",
+    userID: "user2RandomID",
   },
   u1r2L3: {
     longURL: "https://www.amazon.ca",
