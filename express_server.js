@@ -19,17 +19,16 @@ const {
   urlsForUser,
   checkLoggedInUser,
   isUserLoggedIn
-} = require("./helper_functions/helpers");
+} = require("./helpers");
 
 app.set("view engine", "ejs");//Tells the Express app to use EJS as its templating engine.
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
 app.use(cookieSession({
   name: 'session',
   keys: ['secret!'],
-
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 
 
 //==================================================
@@ -40,10 +39,9 @@ app.get("/", (req, res) => {
 
 //GET route for URLS, define URLS data will.
 app.get("/urls", (req, res) => {
-  console.log(req.session)
-  checkLoggedInUser(req, res)
+  checkLoggedInUser(req, res);
 
-  let user = getUser(req.session.user_id)
+  let user = getUser(req.session.user_id);
 
   const templateVars = {
     user: user,
@@ -76,7 +74,7 @@ app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is 
       user: user,
       id: req.params.id,
       longURL: url.longURL
-    }
+    };
 
     return res.render("urls_show", templateVars);//use res.render() to pass the URL data to urls_show template.
   } else {
@@ -86,23 +84,19 @@ app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is 
 
 //Link redirection in shorter version
 app.get("/u/:id", (req, res) => {
-  checkLoggedInUser(req, res);
+  const urlDBKeys = Object.keys(urlDatabase);
 
-  const user = getUser(req.session.user_id);
-  const url  = urlsForUser(user.id)[req.params.id];
+  for (let key = 0; key < urlDBKeys.length; key++) {
+    if (req.params.id === urlDBKeys[key]) {
+      const templateVars  = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL};
 
-  if (url) {
-    const templateVars = {
-      user: user,
-      id: req.params.id,
-      longURL: url.longURL
+      const longURL = templateVars.longURL;
+
+      return res.redirect(longURL);
+    } else {
+      res.send("<html><body>The requested <b>resource</b> could not be found.</html>");
     }
-
-    const longURL = templateVars.longURL;
-    return res.redirect(longURL);
   }
-
-  res.send("<html><body>The requested resource could not be found.</html>\n");
 });
 
 
@@ -120,7 +114,7 @@ app.post("/urls", (req, res) => {
     const newUrl = {
       longURL: withHttp(req.body.longURL),
       userID: req.session.user_id
-    }
+    };
 
     urlDatabase[newKey] = newUrl;//Add new key:value pair to urlDatabase after clicking submit.
 
@@ -199,16 +193,16 @@ app.post("/register", (req, res) => {
     return res.status(400).send('A user with that email already exists, try to login instead');
   }
   //save new user info to the dbase.
-  const password = bcrypt.hashSync(req.body.password, 10)
+  const password = bcrypt.hashSync(req.body.password, 10);
   const newUser = saveUser(req.body.email, password);
 
-  req.session.user_id = newUser.id
+  req.session.user_id = newUser.id;
   res.redirect("/urls");
 });
 
 //POST that logouts user
 app.post("/logout", (req, res) => {
-  req.session = null
+  req.session = null;
   res.redirect("/login");
 });
 
@@ -223,7 +217,7 @@ app.post("/urls/:id/delete", (req, res) => {
     return res.redirect('/urls');
   } else {
     return res.send("<html><body>Unauthorized. You do not own this url.</html>\n");
-  }  
+  }
 });
 
 //======== ADDITIONAL: Error handling ========
@@ -249,7 +243,7 @@ app.post("/error", (req, res) => {
   const newUrl = {
     longURL: withHttp(req.body.longURL),
     userID: req.session.user_id
-  }
+  };
 
   urlDatabase[newKey] = newUrl;//Add new key:value pair to urlDatabase after clicking submit.
 
