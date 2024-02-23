@@ -118,14 +118,20 @@ app.post("/urls/:id", (req, res) => {
 
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.redirect("/error");
-  } else {
+  }
+
+  const url = urlsForUser(req.cookies.user_id)[req.params.id];
+
+  if (url) {
     //function that will check HTTP or HTTPS protocol
     const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
-    const url = urlDatabase[req.params.id];
+    
     url.longURL = withHttp(req.body.longURL);
     urlDatabase[req.params.id] = url;
 
     return res.redirect(`/urls`);
+  } else {
+    return res.send("<html><body>Unauthorized. You do not own this url.</html>\n");
   }
 });
 
@@ -195,8 +201,14 @@ app.post("/logout", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   checkLoggedInUser(req, res);
 
-  delete urlDatabase[req.params.id];
-  return res.redirect('/urls');
+  const url = urlsForUser(req.cookies.user_id)[req.params.id];
+
+  if (url) {
+    delete urlDatabase[req.params.id];
+    return res.redirect('/urls');
+  } else {
+    return res.send("<html><body>Unauthorized. You do not own this url.</html>\n");
+  }  
 });
 
 //======== ADDITIONAL: Error handling ========
