@@ -58,13 +58,22 @@ app.get("/urls/new", (req, res) => {
 
 // Route with route parameter
 app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is a route parameter.
-  const templateVars = {
-    user: getUser(req.cookies["user_id"]),
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL
-  };
+  checkLoggedInUser(req, res);
 
-  res.render("urls_show", templateVars);//use res.render() to pass the URL data to urls_show template.
+  const user = getUser(req.cookies["user_id"]);
+  const url  = urlsForUser(user.id)[req.params.id];
+
+  if (url) {
+    const templateVars = {
+      user: user,
+      id: req.params.id,
+      longURL: url.longURL
+    }
+
+    return res.render("urls_show", templateVars);//use res.render() to pass the URL data to urls_show template.
+  } else {
+    return res.send("<html><body>Unauthorized. You do not own this url.</html>\n");
+  }
 });
 
 //Shorter version of redirect link
