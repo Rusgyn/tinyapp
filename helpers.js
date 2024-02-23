@@ -18,10 +18,8 @@ const getUser = (id) => {
 
 //Helper function will obtain the user from our users property objects
 const getUserByEmail = (email, database) => {
-  let usersEmail = "";
   for(let key in database) {
-   usersEmail = (database[key].email);
-   if (email === usersEmail) {
+   if (email === database[key].email) {
     return database[key];
    }
   }
