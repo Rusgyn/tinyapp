@@ -40,6 +40,7 @@ app.get("/", (req, res) => {
 
 //GET route for URLS, define URLS data will.
 app.get("/urls", (req, res) => {
+  console.log(req.session)
   checkLoggedInUser(req, res)
 
   let user = getUser(req.session.user_id)
@@ -83,21 +84,29 @@ app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is 
   }
 });
 
-//Shorter version of redirect link
+//Link redirection in shorter version
 app.get("/u/:id", (req, res) => {
-  const templateVars  = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  const longURL = templateVars.longURL;
-  //To check urlDatabase properties has the route parameter,(req.params.id).
-  const urlDBKeys = Object.keys(urlDatabase);
-  for (let key = 0; key < urlDBKeys.length; key++) {
-    if (req.params.id === urlDBKeys[key]) {
-      return res.redirect(longURL);
+  checkLoggedInUser(req, res);
+
+  const user = getUser(req.session.user_id);
+  const url  = urlsForUser(user.id)[req.params.id];
+
+  if (url) {
+    const templateVars = {
+      user: user,
+      id: req.params.id,
+      longURL: url.longURL
     }
+
+    const longURL = templateVars.longURL;
+    return res.redirect(longURL);
   }
+
   res.send("<html><body>The requested resource could not be found.</html>\n");
 });
 
-//POST route to receive the form submission.
+
+//POST route - receives submitted form.
 app.post("/urls", (req, res) => {
   checkLoggedInUser(req, res);
 
@@ -119,12 +128,12 @@ app.post("/urls", (req, res) => {
   }
 });
 
-//POST route that will update the value of stored longURL.
+//POST route - update/edit the stored longURL
 app.post("/urls/:id", (req, res) => {
   checkLoggedInUser(req, res);
 
   if (req.body.longURL === "" || req.body.longURL === undefined) {
-    return res.redirect("/error");
+    res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
   }
 
   const url = urlsForUser(req.session.user_id)[req.params.id];
@@ -138,7 +147,7 @@ app.post("/urls/:id", (req, res) => {
 
     return res.redirect(`/urls`);
   } else {
-    return res.send("<html><body>Unauthorized. You do not own this url.</html>\n");
+    return res.send("<html><body><b>Unauthorized</b>. You do not own this url.</html>");
   }
 });
 
@@ -152,7 +161,7 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-//GET route that register new user.
+//GET route to register new user.
 app.get("/register", (req, res) => {
   if (isUserLoggedIn(req.session)) {
     return res.redirect("/urls");
@@ -162,9 +171,9 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
-//POST route that will login.
+//POST route that logins user.
 app.post("/login", (req, res) => {
-  const existUser = getUserByEmail(req.body.email);
+  const existUser = getUserByEmail(req.body.email, users);
 
   if (existUser) {
     if (bcrypt.compareSync(req.body.password, existUser.password)) {
@@ -185,7 +194,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send('We cannot process your request, you have provided an empty email or/and password. Try registering again.');
   }
   //To check if user email already exist.
-  const existUser = getUserByEmail(req.body.email);
+  const existUser = getUserByEmail(req.body.email, users);
   if (existUser) {
     return res.status(400).send('A user with that email already exists, try to login instead');
   }
@@ -220,18 +229,32 @@ app.post("/urls/:id/delete", (req, res) => {
 //======== ADDITIONAL: Error handling ========
 //GET route, if provided and empty URL string.
 app.get("/error", (req, res) => {
-  const templateVars = { user: getUser(req.session.user_id), id: req.params.id, longURL: urlDatabase[req.params.id] };
-  res.render("urls_error", templateVars);
+  const templateVars = { user: req.session.user_id }; //getUser(req.session.user_id)
+
+  if (isUserLoggedIn(req.session)) {
+    return res.render("urls_error", templateVars);//render the urls_new template to present the form to the user.
+  }
+  
+  res.redirect("/login");
 });
 
 //POST route, if first attempt was an empty URL string.
 app.post("/error", (req, res) => {
-  let newKey = generateRandomString(6);
+  checkLoggedInUser(req, res);
+
   //function that will check HTTP or HTTPS protocol
   const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
-  urlDatabase[newKey] = withHttp(req.body.longURL);//Add new key:value pair to urlDatabase after clicking submit.
+  
+  const newKey = generateRandomString(6);
+  const newUrl = {
+    longURL: withHttp(req.body.longURL),
+    userID: req.session.user_id
+  }
 
-  res.redirect(`/urls/${newKey}`);
+  urlDatabase[newKey] = newUrl;//Add new key:value pair to urlDatabase after clicking submit.
+
+  res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
+  
 });
 //================================
 
