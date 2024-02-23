@@ -19,7 +19,7 @@ const {
   urlsForUser,
   checkLoggedInUser,
   isUserLoggedIn
-} = require("./helper_functions/helper_functions");
+} = require("./helper_functions/helpers");
 
 app.set("view engine", "ejs");//Tells the Express app to use EJS as its templating engine.
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
@@ -133,7 +133,7 @@ app.post("/urls/:id", (req, res) => {
   checkLoggedInUser(req, res);
 
   if (req.body.longURL === "" || req.body.longURL === undefined) {
-    res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+    return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
   }
 
   const url = urlsForUser(req.session.user_id)[req.params.id];
