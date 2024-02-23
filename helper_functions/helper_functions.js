@@ -17,15 +17,24 @@ const getUser = (id) => {
 };
 
 //Helper function will obtain the user from our users property objects
-const getUserByEmail = (email) => {
+const getUserByEmail = (email, database) => {
   let usersEmail = "";
-  for(let i in users) {
-   usersEmail = (users[i].email);
+  for(let key in database) {
+   usersEmail = (database[key].email);
    if (email === usersEmail) {
-    return users[i];
+    return database[key];
    }
   }
 };
+// const getUserByEmail = (email) => {
+//   let usersEmail = "";
+//   for(let i in users) {
+//    usersEmail = (users[i].email);
+//    if (email === usersEmail) {
+//     return users[i];
+//    }
+//   }
+// };
 
 //Helper function that will save our newly registered user.
 const saveUser = (email, password) => {
