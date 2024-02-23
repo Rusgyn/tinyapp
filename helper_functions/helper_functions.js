@@ -41,8 +41,8 @@ const saveUser = (email, password) => {
 };
 
 //Helper function that check the cookies if there's an active user.
-const isUserLoggedIn = (requestCookies) => {
-  return (requestCookies.user_id ? true : false)
+const isUserLoggedIn = (session) => {
+  return (session.user_id ? true : false)
 }
 
 const urlsForUser = (userId) => {
@@ -58,7 +58,7 @@ const urlsForUser = (userId) => {
 }
 
 const checkLoggedInUser = (request, response) => {
-  if (!isUserLoggedIn(request.cookies)) {
+  if (!isUserLoggedIn(request.session)) {
     return response.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
   }
 }

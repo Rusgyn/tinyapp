@@ -23,7 +23,13 @@ const {
 
 app.set("view engine", "ejs");//Tells the Express app to use EJS as its templating engine.
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret!'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 
 //==================================================
@@ -36,7 +42,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   checkLoggedInUser(req, res)
 
-  let user = getUser(req.cookies["user_id"])
+  let user = getUser(req.session.user_id)
 
   const templateVars = {
     user: user,
@@ -48,9 +54,9 @@ app.get("/urls", (req, res) => {
 
 //GET route to create new URL
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: req.cookies["user_id"] }; //getUser(req.cookies["user_id"])
+  const templateVars = { user: req.session.user_id }; //getUser(req.session.user_id)
 
-  if (isUserLoggedIn(req.cookies)) {
+  if (isUserLoggedIn(req.session)) {
     return res.render("urls_new", templateVars);//render the urls_new template to present the form to the user.
   }
   
@@ -61,7 +67,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is a route parameter.
   checkLoggedInUser(req, res);
 
-  const user = getUser(req.cookies["user_id"]);
+  const user = getUser(req.session.user_id);
   const url  = urlsForUser(user.id)[req.params.id];
 
   if (url) {
@@ -104,7 +110,7 @@ app.post("/urls", (req, res) => {
     const newKey = generateRandomString(6);
     const newUrl = {
       longURL: withHttp(req.body.longURL),
-      userID: req.cookies.user_id
+      userID: req.session.user_id
     }
 
     urlDatabase[newKey] = newUrl;//Add new key:value pair to urlDatabase after clicking submit.
@@ -121,7 +127,7 @@ app.post("/urls/:id", (req, res) => {
     return res.redirect("/error");
   }
 
-  const url = urlsForUser(req.cookies.user_id)[req.params.id];
+  const url = urlsForUser(req.session.user_id)[req.params.id];
 
   if (url) {
     //function that will check HTTP or HTTPS protocol
@@ -138,7 +144,7 @@ app.post("/urls/:id", (req, res) => {
 
 //GET route to login
 app.get("/login", (req, res) => {
-  if (isUserLoggedIn(req.cookies)) {
+  if (isUserLoggedIn(req.session)) {
     return res.redirect("/urls");
   }
 
@@ -148,7 +154,7 @@ app.get("/login", (req, res) => {
 
 //GET route that register new user.
 app.get("/register", (req, res) => {
-  if (isUserLoggedIn(req.cookies)) {
+  if (isUserLoggedIn(req.session)) {
     return res.redirect("/urls");
   }
 
@@ -162,7 +168,7 @@ app.post("/login", (req, res) => {
 
   if (existUser) {
     if (bcrypt.compareSync(req.body.password, existUser.password)) {
-      res.cookie("user_id", existUser.id);
+      req.session.user_id = existUser.id;
       return res.redirect("/urls");
     } else {
       return res.status(403).send('You have entered an invalid username or password');
@@ -187,13 +193,13 @@ app.post("/register", (req, res) => {
   const password = bcrypt.hashSync(req.body.password, 10)
   const newUser = saveUser(req.body.email, password);
 
-  res.cookie("user_id", newUser.id);
+  req.session.user_id = newUser.id
   res.redirect("/urls");
 });
 
 //POST that logouts user
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null
   res.redirect("/login");
 });
 
@@ -201,7 +207,7 @@ app.post("/logout", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   checkLoggedInUser(req, res);
 
-  const url = urlsForUser(req.cookies.user_id)[req.params.id];
+  const url = urlsForUser(req.session.user_id)[req.params.id];
 
   if (url) {
     delete urlDatabase[req.params.id];
@@ -214,7 +220,7 @@ app.post("/urls/:id/delete", (req, res) => {
 //======== ADDITIONAL: Error handling ========
 //GET route, if provided and empty URL string.
 app.get("/error", (req, res) => {
-  const templateVars = { user: getUser(req.cookies["user_id"]), id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { user: getUser(req.session.user_id), id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_error", templateVars);
 });
 
