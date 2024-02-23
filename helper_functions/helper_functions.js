@@ -45,10 +45,23 @@ const isUserLoggedIn = (requestCookies) => {
   return (requestCookies.user_id ? true : false)
 }
 
+const urlsForUser = (userId) => {
+  let urls = {}
+
+  for (const [urlId, url] of Object.entries(urlDatabase)) {    
+    if (userId === url.userID) {
+      urls[urlId] = url
+    }
+  }
+
+  return urls;
+}
+
 module.exports = {
   generateRandomString,
   getUser,
   getUserByEmail,
   saveUser,
+  urlsForUser,
   isUserLoggedIn
 }

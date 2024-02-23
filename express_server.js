@@ -15,6 +15,7 @@ const {
   getUser,
   getUserByEmail,
   saveUser,
+  urlsForUser,
   isUserLoggedIn
 } = require("./helper_functions/helper_functions");
 
@@ -31,9 +32,15 @@ app.get("/", (req, res) => {
 
 //GET route for URLS, define URLS data will.
 app.get("/urls", (req, res) => {
+  if (!isUserLoggedIn(req.cookies)) {
+    return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
+  }
+  
+  let user = getUser(req.cookies["user_id"])
+
   const templateVars = {
-    user: getUser(req.cookies["user_id"]),
-    urls: urlDatabase
+    user: user,
+    urls: urlsForUser(user.id)
   };
 
   res.render("urls_index", templateVars);//use res.render() to pass the URL data (urlDatabase) to urls_index.ejs template.
