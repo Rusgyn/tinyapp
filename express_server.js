@@ -84,19 +84,15 @@ app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is 
 
 //Link redirection in shorter version
 app.get("/u/:id", (req, res) => {
-  const urlDBKeys = Object.keys(urlDatabase);
-
-  for (let key = 0; key < urlDBKeys.length; key++) {
-    if (req.params.id === urlDBKeys[key]) {
+  for (let key in urlDatabase) {
+    if (req.params.id === key) {
       const templateVars  = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL};
-
       const longURL = templateVars.longURL;
 
       return res.redirect(longURL);
-    } else {
-      res.send("<html><body>The requested <b>resource</b> could not be found.</html>");
-    }
+    } 
   }
+  return res.send("<html><body>The requested <b>resource</b> could not be found.</html>");
 });
 
 
