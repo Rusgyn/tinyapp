@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();// Define our app as an instance of express
 const PORT = 8080;
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 
 //Import Database using module
