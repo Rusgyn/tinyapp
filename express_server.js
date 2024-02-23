@@ -35,6 +35,7 @@ app.get("/urls", (req, res) => {
     user: getUser(req.cookies["user_id"]),
     urls: urlDatabase
   };
+
   res.render("urls_index", templateVars);//use res.render() to pass the URL data (urlDatabase) to urls_index.ejs template.
 });
 

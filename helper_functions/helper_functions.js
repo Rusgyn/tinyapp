@@ -35,9 +35,9 @@ const saveUser = (email, password) => {
     password: password
   };
 
-  users[newUser.id] = newUser; //users[123abc] = {id:TEST, email, pw}
+  users[newUser.id] = newUser;
 
-  return newUser; //{id:TEST, email, pw}
+  return newUser;
 };
 
 //Helper function that check the cookies if there's an active user.
