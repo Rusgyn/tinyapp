@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { getUserByEmail, urlsForUser  } = require('../helper_functions/helpers');
+const { getUserByEmail } = require('../helper_functions/helpers');
 
 const testUsers = {
   "userRandomID": {
@@ -16,14 +16,14 @@ const testUsers = {
 };
 
 describe('getUserByEmail', function() {
-  it('should return a user with valid email', function() {
+  it('should return a userRandomID when provided with user@example.com email', function() {
     const user = getUserByEmail("user@example.com", testUsers)
     const expectedUserID = "userRandomID";
     // Write your assert statement here
     assert.equal(user.id, expectedUserID);
   });
 
-  it('should return a user with valid email', function() {
+  it('should return a user2RandomID when provided with user2@example.com email', function() {
     const user = getUserByEmail("user2@example.com", testUsers)
     const expectedUserID = "user2RandomID";
     // Write your assert statement here
