@@ -22,6 +22,8 @@ app.set("view engine", "ejs");//Tells the Express app to use EJS as its templati
 app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
 app.use(cookieParser());
 
+
+//==================================================
 //GET route to homepage
 app.get("/", (req, res) => {
   res.send("Hello!");//Respond "Hello" when a GET request is made to the homepage
@@ -38,7 +40,7 @@ app.get("/urls", (req, res) => {
 
 //GET route to create new URL
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: getUser(req.cookies["user_id"]) };
+  const templateVars = { user: req.cookies["user_id"] }; //getUser(req.cookies["user_id"])
 
   if (isUserLoggedIn(req.cookies)) {
     return res.render("urls_new", templateVars);//render the urls_new template to present the form to the user.
@@ -49,7 +51,12 @@ app.get("/urls/new", (req, res) => {
 
 // Route with route parameter
 app.get("/urls/:id", (req, res) => {//The : in front of id indicates that id is a route parameter.
-  const templateVars = { user: getUser(req.cookies["user_id"]), id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = {
+    user: getUser(req.cookies["user_id"]),
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id].longURL
+  };
+
   res.render("urls_show", templateVars);//use res.render() to pass the URL data to urls_show template.
 });
 
@@ -69,41 +76,45 @@ app.get("/u/:id", (req, res) => {
 
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
-
   if (!isUserLoggedIn(req.cookies)) {
     return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
   }
 
-  let newKey = generateRandomString(6);
-  //function that will check HTTP or HTTPS protocol
-  const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.redirect("/error");
   } else {
-    urlDatabase[newKey] = withHttp(req.body.longURL);//Add new key:value pair to urlDatabase after clicking submit.
+    //function that will check HTTP or HTTPS protocol
+    const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
+    
+    const newKey = generateRandomString(6);
+    const newUrl = {
+      longURL: withHttp(req.body.longURL),
+      userID: req.cookies.user_id
+    }
+
+    urlDatabase[newKey] = newUrl;//Add new key:value pair to urlDatabase after clicking submit.
+
+    res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
   }
-  
-  res.redirect(`/urls/${newKey}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
 //POST route that will update the value of stored longURL.
 app.post("/urls/:id", (req, res) => {
-
   if (!isUserLoggedIn(req.cookies)) {
     return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
   }
 
-  //function that will check HTTP or HTTPS protocol
-  const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
-  
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.redirect("/error");
   } else {
-    urlDatabase[req.params.id] = withHttp(req.body.longURL);
+    //function that will check HTTP or HTTPS protocol
+    const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
+    const url = urlDatabase[req.params.id];
+    url.longURL = withHttp(req.body.longURL);
+    urlDatabase[req.params.id] = url;
+
+    return res.redirect(`/urls`);
   }
-
-  return res.redirect(`/urls`);
-
 });
 
 //GET route to login
@@ -155,6 +166,7 @@ app.post("/register", (req, res) => {
   }
   //save new user info to the dbase.
   const newUser = saveUser(req.body.email, req.body.password);
+
   res.cookie("user_id", newUser.id);
   res.redirect("/urls");
 });

@@ -12,8 +12,8 @@ const {
 
 
 //This helper function will get the user from our users dbase.
-const getUser = (userId) => {
-  return users[userId];
+const getUser = (id) => {
+  return users[id];
 };
 
 //Helper function will obtain the user from our users property objects
@@ -29,22 +29,21 @@ const getUserByEmail = (email) => {
 
 //Helper function that will save our newly registered user.
 const saveUser = (email, password) => {
-  const userKey = generateRandomString(6);
   const newUser = {
-    id: userKey,
+    id: generateRandomString(6),
     email: email,
     password: password
   };
-  users[userKey] = newUser;
 
-  return newUser;
+  users[newUser.id] = newUser; //users[123abc] = {id:TEST, email, pw}
+
+  return newUser; //{id:TEST, email, pw}
 };
 
 //Helper function that check the cookies if there's an active user.
 const isUserLoggedIn = (requestCookies) => {
   return (requestCookies.user_id ? true : false)
 }
-
 
 module.exports = {
   generateRandomString,

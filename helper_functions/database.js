@@ -18,11 +18,21 @@ const users = {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "45bd00",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "45bd00",
+  },
+  u1r2L3: {
+    longURL: "https://www.amazon.ca",
+    userID: "test",
+  },
 };
 
 module.exports = Object.freeze({
   users,
   urlDatabase
-})
+});
