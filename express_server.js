@@ -16,6 +16,7 @@ const {
   getUserByEmail,
   saveUser,
   urlsForUser,
+  checkLoggedInUser,
   isUserLoggedIn
 } = require("./helper_functions/helper_functions");
 
@@ -32,10 +33,8 @@ app.get("/", (req, res) => {
 
 //GET route for URLS, define URLS data will.
 app.get("/urls", (req, res) => {
-  if (!isUserLoggedIn(req.cookies)) {
-    return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
-  }
-  
+  checkLoggedInUser(req, res)
+
   let user = getUser(req.cookies["user_id"])
 
   const templateVars = {
@@ -84,9 +83,7 @@ app.get("/u/:id", (req, res) => {
 
 //POST route to receive the form submission.
 app.post("/urls", (req, res) => {
-  if (!isUserLoggedIn(req.cookies)) {
-    return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
-  }
+  checkLoggedInUser(req, res);
 
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.redirect("/error");
@@ -108,9 +105,7 @@ app.post("/urls", (req, res) => {
 
 //POST route that will update the value of stored longURL.
 app.post("/urls/:id", (req, res) => {
-  if (!isUserLoggedIn(req.cookies)) {
-    return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
-  }
+  checkLoggedInUser(req, res);
 
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.redirect("/error");
@@ -127,19 +122,21 @@ app.post("/urls/:id", (req, res) => {
 
 //GET route to login
 app.get("/login", (req, res) => {
-  const templateVars = { user: users };
   if (isUserLoggedIn(req.cookies)) {
     return res.redirect("/urls");
   }
+
+  const templateVars = { user: users };
   res.render("login", templateVars);
 });
 
 //GET route that register new user.
 app.get("/register", (req, res) => {
-  const templateVars = { user: users };
   if (isUserLoggedIn(req.cookies)) {
     return res.redirect("/urls");
   }
+
+  const templateVars = { user: users };
   res.render("register", templateVars);
 });
 
@@ -187,10 +184,7 @@ app.post("/logout", (req, res) => {
 
 //Route that removed a URL resource. Delete.
 app.post("/urls/:id/delete", (req, res) => {
-
-  if (!isUserLoggedIn(req.cookies)) {
-    return res.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
-  }
+  checkLoggedInUser(req, res);
 
   delete urlDatabase[req.params.id];
   return res.redirect('/urls');

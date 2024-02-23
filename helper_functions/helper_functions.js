@@ -57,11 +57,18 @@ const urlsForUser = (userId) => {
   return urls;
 }
 
+const checkLoggedInUser = (request, response) => {
+  if (!isUserLoggedIn(request.cookies)) {
+    return response.send("<html><body>You are require to <b>Login</b> first to access this feature.</html>\n");
+  }
+}
+
 module.exports = {
   generateRandomString,
   getUser,
   getUserByEmail,
   saveUser,
   urlsForUser,
+  checkLoggedInUser,
   isUserLoggedIn
 }
