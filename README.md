@@ -5,7 +5,7 @@ TinyApp is a full stack Web Application built with Node and Express that allows 
 ## Product Images
 
 * Index
-![Index Page](Images/Index.png)
+![Login](Images/Index-Logged_In.png)
 
 * Register
 ![Register Page](Images/Register.png)
@@ -18,6 +18,21 @@ TinyApp is a full stack Web Application built with Node and Express that allows 
 
 * Edit
 ![Edit](Images/Edit.png)
+
+* Error - Main page, when not logged in
+![Error_main](Images/Error-Main_when_not_login.png)
+
+* Error - Login
+![Login_Invalid_User](Images/Error-Login_invalid_creds.png)
+
+* Error - Registration
+![Error_Regs](Images/Error-Registration_existing_account.png)
+
+* Error - short url, non existence
+![Error_short](Images/Error-Short_nonExisting_tinyURL.png)
+
+* Error - URL unauthorized
+![Error_Unauthorized_URL](Images/Error-Unauthorized_URL_access.png)
 
 
 
