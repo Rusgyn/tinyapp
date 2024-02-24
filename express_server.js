@@ -22,7 +22,8 @@ const {
 } = require("./helpers");
 
 app.set("view engine", "ejs");//Tells the Express app to use EJS as its templating engine.
-app.use(express.urlencoded({ extended: true }));//urlencoded will convert the request body from a Buffer into string that we can read.
+app.use(express.urlencoded({ extended: false }));//urlencoded will convert the request body from a Buffer into string that we can read.
+app.use(express.json());
 app.use(cookieSession({
   name: 'session',
   keys: ['secret!'],
