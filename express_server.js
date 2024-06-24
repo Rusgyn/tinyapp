@@ -7,12 +7,19 @@ const urlDatabase = {
   "9sm5xk": "http://www.google.com",
 };
 
+//Home page
 app.get("/", (req, res) => {
   res.send("Hello! Welcome to TinyApp");
 });
 
+//Route, representing the entire urlDatabase object in json string
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
+});
+
+//Route, sending HTML
+app.get("/hello", (req, res) => {
+  res.send("<html> <body> Hello <b>World!</b> </body> </html>")
 });
 
 app.listen(PORT, () => {
