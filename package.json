@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Rusgyn/tinyapp/issues"
   },
-  "homepage": "https://github.com/Rusgyn/tinyapp#readme"
+  "homepage": "https://github.com/Rusgyn/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }
