@@ -11,7 +11,7 @@ const urlDatabase = {
 
 //Home page
 app.get("/", (req, res) => {
-  res.send("Hello! Welcome to TinyApp");
+  res.redirect("/urls");
 });
 
 //Route, representing the entire urlDatabase object in json string
@@ -31,6 +31,11 @@ app.get("/urls", (req, res) => {
   };
 
   res.render("urls_index", templateVars);
+});
+
+//Route that present the create new URL form to the end-user
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 //Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
