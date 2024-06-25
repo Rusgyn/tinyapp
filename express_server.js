@@ -42,6 +42,12 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+//POST route to receive the From Submission.
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("Ok");
+});
+
 //Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
 app.get("/urls/:id", (req, res) => {
     const templateVars = {
