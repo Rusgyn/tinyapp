@@ -2,8 +2,12 @@ const express = require("express"); // use the express module
 const app = express(); // Define app as instance of the express module.
 const PORT = 8080;
 
-app.set('view engine', 'ejs'); //Tells the express app to use ejs as its templating engine.
+//express built-in function that convert the request body from a Buffer into a string.
+app.use(express.urlencoded({ extended: true }));
+//Tells the express app to use ejs as its templating engine.
+app.set('view engine', 'ejs');
 
+//PreDefine database.
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xk": "http://www.google.com",
