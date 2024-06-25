@@ -22,6 +22,7 @@ app.get("/hello", (req, res) => {
   res.send("<html> <body> Hello <b>World!</b> </body> </html>")
 });
 
+//Make the server listen on our define port, 8080
 app.listen(PORT, () => {
-  console.log(`App listening on pport ${PORT}!`);
+  console.log(`App listening on port ${PORT}!`);
 });
