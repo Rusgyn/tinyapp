@@ -23,9 +23,10 @@
 
     <main style="margin: 1em;">
       <h3>Create TinyURL</h3>
-      <form class="form-inline" action="/urls" method="POST">
+      <form class="form-inline" action="/urls" method="POST"> <!-- The action attribute tells the form which URL to submit to. The method attribute tells the form which HTTP method to use when submitting the form. -->
         <div class="form-group mb-2">
           <label for="longURL">Enter a URL:</label>
+          <!--name attribute is important, it identifies data we are sending -->
           <input
             class="form-control"
             type="text"
@@ -33,7 +34,7 @@
             placeholder="http://"
             style="width: 300px; margin: 1em"
           />
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" class="btn btn-primary">Submit</button> <!-- The type attribute tells how the button behaves. Type submit will submit the form date to the server. -->
         </div>
       </form>
     </main>
