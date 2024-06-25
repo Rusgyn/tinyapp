@@ -1,6 +1,8 @@
 const express = require("express"); // use the express module
 const app = express(); // Define app as instance of the express module.
-const PORT = 8080; //Default port 80880
+const PORT = 8080;
+
+app.set('view engine', 'ejs'); //Tells the express app to use ejs as its templating engine.
 
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
