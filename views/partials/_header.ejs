@@ -17,6 +17,34 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
+
+      <!-- Login section -->
+
+      <div class="col offset-md-6">
+        <% if (username) { %>
+          <div class="row">
+            <p class="col-6 mt-2 mb-2 text-right" style="color:indigo; margin: 1em" mar>Logged In as: <strong><%= username %></strong></p>
+            <!-- Logout -->
+            <form class="form-inline col-4" action="/logout" method="POST">
+              <input class="btn btn-outline-dark" type="submit" value="Logout"/>
+            </form>
+          </div>
+
+        
+
+        <% } else { %>  <!-- Guard. Username === False (not logged-in), then display the login input/form -->
+          <form class="form-inline" action="/login" method="POST">
+            <input required class="form-control mr-sm-3"
+            type="text"
+            name="username"
+            placeholder="Username"
+            style="width: 200px; margin: 1em">
+            <input class="btn btn-outline-dark" type="submit" value="Login"/>
+          </form>
+        <% } %>
+      </div>
+      <!-- End login section -->
     </div>
+
   </nav>
 </header>
