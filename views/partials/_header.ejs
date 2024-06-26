@@ -20,13 +20,21 @@
 
       <!-- Login section -->
 
-      <div class="col-md-3 offset-md-7">
+      <div class="col offset-md-6">
+        <% if (username) { %>
+          <div class="row">
+            <p class="col-6 mt-2 mb-2 text-right" style="color:indigo; margin: 1em" mar>Logged In as: <strong><%= username %></strong></p>
+            <!-- Logout -->
+            <form class="form-inline col-4" action="/logout" method="POST">
+              <input class="btn btn-outline-dark" type="submit" value="Logout"/>
+            </form>
+          </div>
+
         
-        <% if(username) { %> <!-- Guard. Username === true (logged-in), then display the username -->
-          <p class = "col-md-8 offset-md-4" style="margin: 1em; color:indigo">Logged In as:&nbsp&nbsp<strong><%= username %></strong></p> <!--&nbsp is whitespace-->
+
         <% } else { %>  <!-- Guard. Username === False (not logged-in), then display the login input/form -->
           <form class="form-inline" action="/login" method="POST">
-            <input required class="form-control mr-sm-3" 
+            <input required class="form-control mr-sm-3"
             type="text"
             name="username"
             placeholder="Username"
@@ -34,10 +42,8 @@
             <input class="btn btn-outline-dark" type="submit" value="Login"/>
           </form>
         <% } %>
-
       </div>
       <!-- End login section -->
-       
     </div>
 
   </nav>
