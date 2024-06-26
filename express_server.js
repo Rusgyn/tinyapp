@@ -49,6 +49,12 @@ app.get("/urls/new", (req, res) => {
 
 //POST route to receive the Form Submission.
 app.post("/urls", (req, res) => {
+
+  //Error Handling. Shows error message if longURL is not define or empty.
+  if (req.body.longURL === "" || req.body.longURL === undefined) {
+    return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+  };
+
   const id = generateRandomString(8); //Obtain random id as new key
   const newLongURL = req.body.longURL;
 
