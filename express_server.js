@@ -1,9 +1,12 @@
 const express = require("express"); // use the express module
 const app = express(); // Define app as instance of the express module.
 const PORT = 8080;
+const cookieParser = require('cookie-parser');
 
 //express built-in function that convert the request body from a Buffer into a string.
 app.use(express.urlencoded({ extended: true }));
+//Express middleware that facilitates working with cookies.
+app.use(cookieParser());
 //Tells the express app to use ejs as its templating engine.
 app.set('view engine', 'ejs');
 
@@ -36,6 +39,7 @@ app.get("/hello", (req, res) => {
 //READ - Route handler for "/urls"
 app.get("/urls", (req, res) => {
   const templateVars = {
+    username: req.cookies["username"],
     urls: urlDatabase
   };
 
@@ -44,12 +48,13 @@ app.get("/urls", (req, res) => {
 
 //CREATE - Route that present the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"] };
+  
+  res.render("urls_new", templateVars);
 });
 
 //CREATE - POST route to receive the Form Submission.
 app.post("/urls", (req, res) => {
-
   //Error Handling. Shows error message if longURL is not define or empty.
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
@@ -57,7 +62,6 @@ app.post("/urls", (req, res) => {
 
   const id = generateRandomString(8); //Obtain random id as new key
   const newLongURL = req.body.longURL;
-
   urlDatabase[id] = newLongURL; //Add the new key-value to our database
 
   res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
@@ -73,10 +77,12 @@ app.get("/u/:id", (req, res) => {
 //READ - Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
+    username: req.cookies["username"],
     id: req.params.id, 
     longURL: urlDatabase[req.params.id]
   };
-  res.render("urls_show", templateVars);
+
+  res.render("urls_show", templateVars); //use res.render() to pass the data to urls_show template.
 });
 
 //EDIT - POST route that updates/edits a URL resource
