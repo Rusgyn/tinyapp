@@ -7,6 +7,11 @@ app.use(express.urlencoded({ extended: true }));
 //Tells the express app to use ejs as its templating engine.
 app.set('view engine', 'ejs');
 
+//Function that generates random alphanumeric characters.
+const generateRandomString = (length) => {
+  return Math.random().toString(36).substring(2, length);
+};
+
 //PreDefine database.
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
@@ -44,13 +49,13 @@ app.get("/urls/new", (req, res) => {
 
 //POST route to receive the From Submission.
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
 //Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
 app.get("/urls/:id", (req, res) => {
-    const templateVars = {
+  const templateVars = {
     id: req.params.id, 
     longURL: urlDatabase[req.params.id]
   };
