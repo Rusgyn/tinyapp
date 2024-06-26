@@ -106,7 +106,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   //Setting a cookie named username
   res.cookie('username', req.body.username);
-  console.log(req.body.username);
+  
   res.redirect("/urls"); //After successful login, redirect the client back to the urls page
 });
 
