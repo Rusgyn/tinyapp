@@ -49,14 +49,19 @@ app.get("/urls/new", (req, res) => {
 
 //POST route to receive the Form Submission.
 app.post("/urls", (req, res) => {
-
   const id = generateRandomString(8); //Obtain random id as new key
   const newLongURL = req.body.longURL;
 
   urlDatabase[id] = newLongURL; //Add the new key-value to our database
 
   res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
+});
 
+//Route that redirect short URLs
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id]; //Access the value of given key or call as the shorter version of the URL.
+  
+  res.redirect(longURL);
 });
 
 //Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
