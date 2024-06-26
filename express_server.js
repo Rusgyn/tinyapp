@@ -104,8 +104,10 @@ app.get("/login", (req, res) => {
 
 //CREATE - POST route that handles login.
 app.post("/login", (req, res) => {
-  console.log(req.params);
-  res.send("LOGIN - okay");
+  //Setting a cookie named username
+  res.cookie('username', req.body.username);
+  console.log(req.body.username);
+  res.redirect("/urls"); //After successful login, redirect the client back to the urls page
 });
 
 //Make the server listen on our define port, 8080
