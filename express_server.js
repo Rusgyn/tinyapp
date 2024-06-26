@@ -79,6 +79,12 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//POST route that removes or deletes a URL resource.
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+
+  res.redirect("/urls"); //After the resource has been deleted, redirect the client back to the urls_index page
+})
 
 //Make the server listen on our define port, 8080
 app.listen(PORT, () => {
