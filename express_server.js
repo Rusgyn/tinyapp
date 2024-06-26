@@ -116,6 +116,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls"); //After successful login, redirect the client back to the urls page
 });
 
+app.post("/logout", (req, res) => {
+  res.clearCookie("username", req.cookies); //clears the value of key username in cookie.
+
+  res.redirect("/urls");
+});
+
 //Make the server listen on our define port, 8080
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
