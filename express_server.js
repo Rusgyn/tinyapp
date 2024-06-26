@@ -23,7 +23,7 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-//Route, representing the entire urlDatabase object in json string
+//READ - Route, representing the entire urlDatabase object in json string
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -33,7 +33,7 @@ app.get("/hello", (req, res) => {
   res.send("<html> <body> Hello <b>World!</b> </body> </html>")
 });
 
-//Route handler for "/urls"
+//READ - Route handler for "/urls"
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase
@@ -42,12 +42,12 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//Route that present the Form Submission to create new URL to the end-user
+//CREATE - Route that present the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-//POST route to receive the Form Submission.
+//CREATE - POST route to receive the Form Submission.
 app.post("/urls", (req, res) => {
 
   //Error Handling. Shows error message if longURL is not define or empty.
@@ -63,14 +63,14 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
-//Route that redirect short URLs
+//READ - Route that redirect short URLs
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id]; //Access the value of given key or call as the shorter version of the URL.
   
   res.redirect(longURL);
 });
 
-//Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
+//READ - Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id, 
@@ -79,7 +79,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//POST route that updates/edits a URL resource
+//EDIT - POST route that updates/edits a URL resource
 app.post("/urls/:id", (req, res) => {
   //Error Handling. Shows error message if longURL is not define or empty.
   if (req.body.longURL === "" || req.body.longURL === undefined) {
@@ -91,12 +91,18 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls"); //redirect the client back to its homepage.
 })
 
-//POST route that removes or deletes a URL resource.
+//DELETE - POST route that removes or deletes a URL resource.
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
 
   res.redirect("/urls"); //After the resource has been deleted, redirect the client back to the urls_index page
 })
+
+//CREATE - POST route that handles login.
+app.post("/login", (req, res) => {
+  console.log(req.params);
+  res.send("LOGIN - okay");
+});
 
 //Make the server listen on our define port, 8080
 app.listen(PORT, () => {
