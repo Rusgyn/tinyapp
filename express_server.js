@@ -79,6 +79,18 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//POST route that updates/edits a URL resource
+app.post("/urls/:id", (req, res) => {
+  //Error Handling. Shows error message if longURL is not define or empty.
+  if (req.body.longURL === "" || req.body.longURL === undefined) {
+    return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+  };
+
+  urlDatabase[req.params.id] = req.body.longURL; //Update the value as per the key (id)
+
+  res.redirect("/urls"); //redirect the client back to its homepage.
+})
+
 //POST route that removes or deletes a URL resource.
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
