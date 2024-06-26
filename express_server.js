@@ -42,15 +42,21 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//Route that present the create new URL form to the end-user
+//Route that present the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-//POST route to receive the From Submission.
+//POST route to receive the Form Submission.
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+
+  const id = generateRandomString(8); //Obtain random id as new key
+  const newLongURL = req.body.longURL;
+
+  urlDatabase[id] = newLongURL; //Add the new key-value to our database
+
+  res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
+
 });
 
 //Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
