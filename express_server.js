@@ -97,6 +97,10 @@ app.post("/urls/:id/delete", (req, res) => {
 
   res.redirect("/urls"); //After the resource has been deleted, redirect the client back to the urls_index page
 })
+//READ - Route that shows the index page where user can login.
+app.get("/login", (req, res) => {
+  res.render("/urls");
+})
 
 //CREATE - POST route that handles login.
 app.post("/login", (req, res) => {
