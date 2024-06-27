@@ -15,7 +15,21 @@ const generateRandomString = (length) => {
   return Math.random().toString(36).substring(2, length);
 };
 
-//PreDefine database.
+//PreDefine users database
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "[email protected]",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "[email protected]",
+    password: "dishwasher-funk",
+  },
+};
+
+//PreDefine URL database.
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xk": "http://www.google.com",
@@ -24,16 +38,6 @@ const urlDatabase = {
 //Home page
 app.get("/", (req, res) => {
   res.redirect("/urls");
-});
-
-//READ - Route, representing the entire urlDatabase object in json string
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-//Route, sending HTML
-app.get("/hello", (req, res) => {
-  res.send("<html> <body> Hello <b>World!</b> </body> </html>")
 });
 
 //READ - Route handler for "/urls"
@@ -110,9 +114,22 @@ app.get("/register", (req, res) => {
 });
 
 //POST Route to /register
-// app.post("/register", (req, res) => {
+app.post("/register", (req, res) => {
 
-// });
+ const id = generateRandomString(8);//This will generate a random id for new user.
+
+ //an instance of new user info
+ const newUser = {
+  id: id,
+  email: req.body.email,
+  password: req.body.password
+ };
+
+ users[id] = newUser;//Add the new user to the users database.
+ res.cookie("user_id", newUser.id);//set cookie with the new user id.
+ 
+ res.redirect("/urls");
+});
 
 //READ - Route that shows the index page where user can login.
 app.get("/login", (req, res) => {
@@ -131,6 +148,18 @@ app.post("/logout", (req, res) => {
   res.clearCookie("username", req.cookies); //clears the value of key username in cookie.
 
   res.redirect("/urls");
+});
+
+//=====================
+
+//READ - Route, representing the entire urlDatabase object in json string
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+//Route, sending HTML
+app.get("/hello", (req, res) => {
+  res.send("<html> <body> Hello <b>World!</b> </body> </html>")
 });
 
 //Make the server listen on our define port, 8080
