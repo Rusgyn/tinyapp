@@ -109,6 +109,11 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
+//POST Route to /register
+// app.post("/register", (req, res) => {
+
+// });
+
 //READ - Route that shows the index page where user can login.
 app.get("/login", (req, res) => {
   res.render("/urls");
