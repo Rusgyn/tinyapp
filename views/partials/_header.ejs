@@ -21,9 +21,9 @@
       <!-- Login section -->
 
       <div class="col offset-md-6">
-        <% if (username) { %>
+        <% if (user) { %>
           <div class="row">
-            <p class="col-6 mt-2 mb-2 text-right" style="color:indigo; margin: 1em" mar>Logged In as: <strong><%= username %></strong></p>
+            <p class="col-6 mt-2 mb-2 text-right" style="color:indigo; margin: 1em" mar>Logged In as: <strong><%= user.email %></strong></p>
             <!-- Logout -->
             <form class="form-inline col-4" action="/logout" method="POST">
               <input class="btn btn-outline-dark" type="submit" value="Logout"/>
