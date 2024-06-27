@@ -35,6 +35,12 @@ const urlDatabase = {
   "9sm5xk": "http://www.google.com",
 };
 
+//Helper Function
+//To get the user by id
+const getUser = (userId) => { return users[userId] };
+//To get the user by email
+const getUserByEmail = (email) => { return users[email] };
+
 //Home page
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -43,7 +49,7 @@ app.get("/", (req, res) => {
 //READ - Route handler for "/urls"
 app.get("/urls", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: getUser(req.cookies["user_id"]),
     urls: urlDatabase
   };
 
@@ -52,7 +58,7 @@ app.get("/urls", (req, res) => {
 
 //CREATE - Route that present the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user: getUser(req.cookies["user_id"]) };
   
   res.render("urls_new", templateVars);
 });
@@ -81,7 +87,7 @@ app.get("/u/:id", (req, res) => {
 //READ - Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: getUser(req.cookies["user_id"]),
     id: req.params.id, 
     longURL: urlDatabase[req.params.id]
   };
@@ -145,7 +151,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username", req.cookies); //clears the value of key username in cookie.
+  res.clearCookie("user_id"); //clears the value of key username in cookie.
 
   res.redirect("/urls");
 });
