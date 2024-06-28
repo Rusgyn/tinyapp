@@ -56,12 +56,24 @@ const getUserByEmail = (email) => {
 //To get the user object by password
 const getUserByPassword = (password) => {
   let usersPassword = "";
-
   //Iterate the key properties of users object
   for (let key in users) {
     usersPassword = users[key].password;
     if (password === usersPassword) {
       return users[key]; //return the user's object
+    }
+  }
+};
+//To get username and password
+const getUserNamePassword = (email, password) => {
+  let usersEmail = "";
+  let usersPassword = "";
+  //Iterate the key properties of users object
+  for (let key in users) {
+    usersEmail = users[key].email;
+    usersPassword = users[key].password;
+    if (email === usersEmail && password === usersPassword) {
+      return users[key];
     }
   }
 };
@@ -181,14 +193,12 @@ app.get("/login", (req, res) => {
 //POST ROUTE: handles login.
 app.post("/login", (req, res) => {
 
+  const existingUser = getUserNamePassword(req.body.email, req.body.password);
+
   //Error Handler to send status if email or password is empty.
   if (!req.body.email || !req.body.password) return res.status(400).send('Email or password is missing');
-
-  const existingUser = getUserByEmail(req.body.email);
-  const existingPassword = getUserByPassword(req.body.password);
-
   //Error Handler: to check users username and password credentials.
-  if (!existingUser || !existingPassword) return res.status(403).send("Incorrect username and/or password!");
+  if (!existingUser) return res.status(403).send("Incorrect username and/or password!");
 
   //Setting a cookie names user_id
   res.cookie("user_id", existingUser.id);
