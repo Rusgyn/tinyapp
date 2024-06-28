@@ -43,7 +43,6 @@ const getUserByEmail = (email) => {
   let usersEmail = "";
   //Iterate the key properties of users object
   for(let key in users) {
-    console.log(key);
     usersEmail = (users[key].email);
     if (email === usersEmail) {
       return users[key]; //return the user's object
@@ -138,7 +137,8 @@ app.post("/register", (req, res) => {
   };
 
   //Error Handler: user's email already exist
-  if (req.body.email === getUserByEmail(req.body.email).email) {
+  const existingUser = getUserByEmail(req.body.email);
+  if (existingUser && req.body.email === existingUser.email) {
     return res.sendStatus(400);
   };
 
