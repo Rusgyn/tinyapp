@@ -164,6 +164,12 @@ app.get("/login", (req, res) => {
 
 //CREATE - POST route that handles login.
 app.post("/login", (req, res) => {
+
+  //Error Handler to send status if email or password is falsy.
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).send('Email or password is missing');
+  };
+
   const user = getUserByEmail(req.body.email);
   //Setting a cookie named username
   res.cookie("user_id", user.id);
