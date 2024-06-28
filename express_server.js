@@ -182,7 +182,7 @@ app.get("/register", (req, res) => {
   //To check if any user is currently logged in.
   if(isUserLoggedIn(req.cookies)) return res.redirect("/urls");
 
-  res.render("login", templateVars);
+  res.render("register", templateVars);
 });
 
 //POST ROUTE: Handles registering new account
