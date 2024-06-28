@@ -49,13 +49,25 @@ const getUserByEmail = (email) => {
     }
   };
 };
+//To get the user object by password
+const getUserByPassword = (password) => {
+  let usersPassword = "";
 
-//Home page
+  //Iterate the key properties of users object
+  for (let key in users) {
+    usersPassword = users[key].password;
+    if (password === usersPassword) {
+      return users[key]; //return the user's object
+    }
+  }
+};
+
+//GET ROUTE: Load the Index Page
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-//READ - Route handler for "/urls"
+//GET ROUTE: Shows the "/urls"
 app.get("/urls", (req, res) => {
   const templateVars = {
     user: getUser(req.cookies["user_id"]),
@@ -157,26 +169,30 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-//READ - Route that shows the index page where user can login.
+//GET ROUTE: Shows the index page where user can login.
 app.get("/login", (req, res) => {
   res.render("login");
 });
 
-//CREATE - POST route that handles login.
+//POST ROUTE: handles login.
 app.post("/login", (req, res) => {
 
-  //Error Handler to send status if email or password is falsy.
-  if (!req.body.email || !req.body.password) {
-    return res.status(400).send('Email or password is missing');
-  };
+  //Error Handler to send status if email or password is empty.
+  if (!req.body.email || !req.body.password) return res.status(400).send('Email or password is missing');
 
-  const user = getUserByEmail(req.body.email);
-  //Setting a cookie named username
-  res.cookie("user_id", user.id);
+  const existingUser = getUserByEmail(req.body.email);
+  const existingPassword = getUserByPassword(req.body.password);
+
+  //Error Handler: to check users username and password credentials.
+  if (!existingUser || !existingPassword) return res.status(403).send("Incorrect username and/or password!");
+
+  //Setting a cookie names user_id
+  res.cookie("user_id", existingUser.id);
   
   res.redirect("/urls"); //After successful login, redirect the client back to the urls page
 });
 
+//POST ROUTE: handles logout
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id"); //clears the value of key username in cookie.
 
