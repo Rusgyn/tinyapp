@@ -77,6 +77,10 @@ const getUserNamePassword = (email, password) => {
     }
   }
 };
+//To check if user is logged in, return Boolean.
+const isUserLoggedIn = (reqCookies) => {
+  return (reqCookies.user_id ? true : false);
+};
 
 //GET ROUTE: Load the Index Page
 app.get("/", (req, res) => {
@@ -153,8 +157,13 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //GET ROUTE: Shows the registration page
 app.get("/register", (req, res) => {
-  if(req.cookies) return res.redirect("/urls");
-  res.render("register");
+  const templateVars = {
+    user: users
+  };
+  //To check if any user is currently logged in.
+  if(isUserLoggedIn(req.cookies)) return res.redirect("/urls");
+
+  res.render("login", templateVars);
 });
 
 //POST ROUTE: Handles registering new account
@@ -188,8 +197,13 @@ app.post("/register", (req, res) => {
 
 //GET ROUTE: Shows the index page where user can login.
 app.get("/login", (req, res) => {
-  if (req.cookies) return res.redirect("/urls");
-  res.render("login");
+  const templateVars = {
+    user: users
+  };
+  //To check if any user is currently logged in.
+  if(isUserLoggedIn(req.cookies)) return res.redirect("/urls");
+
+  res.render("login", templateVars);
 });
 
 //POST ROUTE: handles login.
