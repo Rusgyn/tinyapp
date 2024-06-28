@@ -91,7 +91,8 @@ const isUserLoggedIn = (reqCookies) => {
 
 //GET ROUTE: Load the Index Page
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  res.render("urls_welcome")
+  //res.redirect("/urls");
 });
 
 //GET ROUTE: Shows the "/urls"
@@ -106,8 +107,7 @@ app.get("/urls", (req, res) => {
     return res.render("urls_index", templateVars);
   }
   
-  return res.render("urls_welcome");
-
+  return res.render("urls_reqDeclined");
 });
 
 //GET ROUTE: PresentS the Form Submission to create new URL to the end-user
