@@ -1,6 +1,6 @@
 <header>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
-        <!-- Without login feature, User already LOGGED in-->
+        <!-- Without register and login feature, User already LOGGED in-->
         <% if (user) { %>
           <a class="navbar-brand" href="/urls">TinyApp</a>
           <button
@@ -18,7 +18,6 @@
             <div class="navbar-nav mt-3 mb-3">
               <a class="nav-item nav-link" href="/urls">My URLs</a>
               <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-              <a class="nav-item nav-link" href="/Register">Register</a>
             </div>
       
           <div class="col offset-md-6">
@@ -32,7 +31,7 @@
           </div>
           </div>
         <% } else { %>
-        <!-- With Login feature -->
+        <!-- With Registration and Login feature, no current log user -->
           <a class="navbar-brand" href="/urls">TinyApp</a>
           <button
             class="navbar-toggler"
@@ -49,9 +48,13 @@
             <div class="navbar-nav mt-3 mb-3">
               <a class="nav-item nav-link" href="/urls">My URLs</a>
               <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+            </div>
+            <div class=" navbar-nav offset-md-8">
               <a class="nav-item nav-link" href="/Register">Register</a>
               <a class="nav-item nav-link" href="/login">Login</a>
             </div>
+          </div>
         <% } %>
+
   </nav>
 </header>
