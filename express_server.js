@@ -38,18 +38,20 @@ const urlDatabase = {
 
 //HELPER FUNCTIONS
 //To get the user by id
-const getUser = (userId) => { return users[userId] };
+const getUser = (userId) => {
+  return users[userId];
+};
 //To get the user object by email
 const getUserByEmail = (email) => {
   let usersEmail = "";
 
   //Iterate the key properties of users object
-  for(let key in users) {
+  for (let key in users) {
     usersEmail = (users[key].email);
     if (email === usersEmail) {
       return users[key]; //return the user's object
     }
-  };
+  }
 };
 //To get the user object by password
 const getUserByPassword = (password) => {
@@ -91,7 +93,7 @@ app.post("/urls", (req, res) => {
   //Error Handling. Shows error message if longURL is not define or empty.
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
-  };
+  }
 
   const id = generateRandomString(8); //Obtain random id as new key
   const newLongURL = req.body.longURL;
@@ -111,7 +113,7 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
     user: getUser(req.cookies["user_id"]),
-    id: req.params.id, 
+    id: req.params.id,
     longURL: urlDatabase[req.params.id]
   };
 
@@ -123,12 +125,12 @@ app.post("/urls/:id", (req, res) => {
   //Error Handling. Shows error message if longURL is not define or empty.
   if (req.body.longURL === "" || req.body.longURL === undefined) {
     return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
-  };
+  }
 
   urlDatabase[req.params.id] = req.body.longURL; //Update the value as per the key (id)
 
   res.redirect("/urls"); //redirect the client back to its homepage.
-})
+});
 
 //POST ROUTE: Handles deleting a URL resource.
 app.post("/urls/:id/delete", (req, res) => {
@@ -148,13 +150,13 @@ app.post("/register", (req, res) => {
   //Error Handler to send status if email or password is falsy.
   if (!req.body.email || !req.body.password) {
     return res.status(400).send('Email or password is missing');
-  };
+  }
 
   //Error Handler: user's email already exist
   const existingUser = getUserByEmail(req.body.email);
   if (existingUser && req.body.email === existingUser.email) {
     return res.status(400).send('Email already exist');
-  };
+  }
 
   const id = generateRandomString(8);//This will generate a random id for new user.
 
@@ -210,7 +212,7 @@ app.get("/urls.json", (req, res) => {
 
 //Route, sending HTML
 app.get("/hello", (req, res) => {
-  res.send("<html> <body> Hello <b>World!</b> </body> </html>")
+  res.send("<html> <body> Hello <b>World!</b> </body> </html>");
 });
 
 //Make the server listen on our define port, 8080
