@@ -15,18 +15,18 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
+            <div class="navbar-nav mt-3 mb-3">
               <a class="nav-item nav-link" href="/urls">My URLs</a>
               <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
               <a class="nav-item nav-link" href="/Register">Register</a>
             </div>
       
-          <div class="col offset-md-7">
+          <div class="col offset-md-6">
             <div class="row">
-              <p class="col-4 mt-2 mb-0 text-right align-bottom">Logged In as: <strong><%= user.email %></strong></p>
+              <p class="col-8 mt-3 mb-3 text-right align-bottom"; style="color: white">Logged In as: <%= user.email %></p>
               <!-- Logout -->
-              <form class="form-inline col-4" action="/logout" method="POST">
-                <input class="btn btn-outline-dark" type="submit" value="Logout"/>
+              <form class="form-inline col-2" action="/logout" method="POST">
+                <input class="btn btn-outline-light" type="submit" value="Logout"/>
               </form>
             </div>
           </div>
@@ -46,7 +46,7 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
+            <div class="navbar-nav mt-3 mb-3">
               <a class="nav-item nav-link" href="/urls">My URLs</a>
               <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
               <a class="nav-item nav-link" href="/Register">Register</a>
