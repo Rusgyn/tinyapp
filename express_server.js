@@ -32,8 +32,15 @@ const users = {
 
 //URL database.
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xk": "http://www.google.com",
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userRandomID"
+  },
+
+  "9sm5xk": {
+    longURL: "http://www.google.com",
+    userID: "user2RandomID"
+  }
 };
 
 //HELPER FUNCTIONS
@@ -89,19 +96,23 @@ app.get("/", (req, res) => {
 
 //GET ROUTE: Shows the "/urls"
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    user: getUser(req.cookies["user_id"]),
-    urls: urlDatabase
-  };
 
-  res.render("urls_index", templateVars);
+  if (isUserLoggedIn(req.cookies)) {
+    const templateVars = {
+      user: getUser(req.cookies["user_id"]),
+      urls: urlDatabase
+    };
+
+    return res.render("urls_index", templateVars);
+  }
+  
+  return res.render("urls_welcome");
+
 });
 
 //GET ROUTE: PresentS the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
-
   const templateVars = { user: getUser(req.cookies["user_id"]) };
-
   //Checks if user is loggedIN- create, if not - /login
   (isUserLoggedIn(req.cookies)) ? res.render("urls_new", templateVars) : res.redirect("/login");
 
@@ -140,7 +151,7 @@ app.get("/u/:id", (req, res) => {
     if (key === req.params.id) {
       const templateVars  = {
         id: req.params.id,
-        longURL: urlDatabase[req.params.id]
+        longURL: urlDatabase[req.params.id].longURL
       };
       const longURL = templateVars.longURL; //Access the value of given key or call as the shorter version of the URL.
       return res.redirect(longURL);
@@ -155,7 +166,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     user: getUser(req.cookies["user_id"]),
     id: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id].longURL
   };
 
   (isUserLoggedIn(req.cookies)) ? res.render("urls_show", templateVars) : res.redirect("/login");
@@ -171,7 +182,7 @@ app.post("/urls/:id", (req, res) => {
     return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
   }
 
-  urlDatabase[req.params.id] = req.body.longURL; //Update the value as per the key (id)
+  urlDatabase[req.params.id].longURL = req.body.longURL; //Update the value as per the key (id)
 
   res.redirect("/urls"); //redirect the client back to its homepage.
 });
