@@ -15,7 +15,8 @@ const generateRandomString = (length) => {
   return Math.random().toString(36).substring(2, length);
 };
 
-//PreDefine users database
+//PREDEFINE DATABASE
+//users database
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -29,18 +30,19 @@ const users = {
   },
 };
 
-//PreDefine URL database.
+//URL database.
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xk": "http://www.google.com",
 };
 
-//Helper Functions
+//HELPER FUNCTIONS
 //To get the user by id
 const getUser = (userId) => { return users[userId] };
 //To get the user object by email
 const getUserByEmail = (email) => {
   let usersEmail = "";
+
   //Iterate the key properties of users object
   for(let key in users) {
     usersEmail = (users[key].email);
@@ -77,14 +79,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//CREATE - Route that present the Form Submission to create new URL to the end-user
+//GET ROUTE: PresentS the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: getUser(req.cookies["user_id"]) };
   
   res.render("urls_new", templateVars);
 });
 
-//CREATE - POST route to receive the Form Submission.
+//POST ROUTE: to receive the Form Submission.
 app.post("/urls", (req, res) => {
   //Error Handling. Shows error message if longURL is not define or empty.
   if (req.body.longURL === "" || req.body.longURL === undefined) {
@@ -98,14 +100,14 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
-//READ - Route that redirect short URLs
+//GET ROUTE: Handles directing short URLs
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id]; //Access the value of given key or call as the shorter version of the URL.
   
   res.redirect(longURL);
 });
 
-//READ - Route handler, use id from route parameter to lookup it's associated longURL from the urlDatabase
+//GET ROUTE: Handle to lookup it's associated longURL from the urlDatabase use id from route parameter (:id)
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
     user: getUser(req.cookies["user_id"]),
@@ -116,7 +118,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars); //use res.render() to pass the data to urls_show template.
 });
 
-//EDIT - POST route that updates/edits a URL resource
+//POST ROUTE: Handles the updating/editing a URL resource
 app.post("/urls/:id", (req, res) => {
   //Error Handling. Shows error message if longURL is not define or empty.
   if (req.body.longURL === "" || req.body.longURL === undefined) {
@@ -128,19 +130,19 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls"); //redirect the client back to its homepage.
 })
 
-//DELETE - POST route that removes or deletes a URL resource.
+//POST ROUTE: Handles deleting a URL resource.
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
 
   res.redirect("/urls"); //After the resource has been deleted, redirect the client back to the urls_index page
 });
 
-//Route that loads the registration page
+//GET ROUTE: Shows the registration page
 app.get("/register", (req, res) => {
   res.render("register");
 });
 
-//POST Route to /register
+//POST ROUTE: Handles registering new account
 app.post("/register", (req, res) => {
  
   //Error Handler to send status if email or password is falsy.
