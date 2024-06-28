@@ -19,7 +19,7 @@ const generateRandomString = (length) => {
 const users = {
   userRandomID: {
     id: "userRandomID",
-    email: "[email protected]",
+    email: "a@a.com",
     password: "purple-monkey-dinosaur",
   },
   user2RandomID: {
@@ -35,11 +35,21 @@ const urlDatabase = {
   "9sm5xk": "http://www.google.com",
 };
 
-//Helper Function
+//Helper Functions
 //To get the user by id
 const getUser = (userId) => { return users[userId] };
-//To get the user by email
-const getUserByEmail = (email) => { return users[email] };
+//To get the user object by email
+const getUserByEmail = (email) => {
+  let usersEmail = "";
+  //Iterate the key properties of users object
+  for(let key in users) {
+    console.log(key);
+    usersEmail = (users[key].email);
+    if (email === usersEmail) {
+      return users[key]; //return the user's object
+    }
+  };
+};
 
 //Home page
 app.get("/", (req, res) => {
@@ -121,20 +131,30 @@ app.get("/register", (req, res) => {
 
 //POST Route to /register
 app.post("/register", (req, res) => {
-
- const id = generateRandomString(8);//This will generate a random id for new user.
-
- //an instance of new user info
- const newUser = {
-  id: id,
-  email: req.body.email,
-  password: req.body.password
- };
-
- users[id] = newUser;//Add the new user to the users database.
- res.cookie("user_id", newUser.id);//set cookie with the new user id.
  
- res.redirect("/urls");
+  //Error Handler to send status if email or password is falsy.
+  if (!req.body.email || !req.body.password) {
+    return res.sendStatus(400);
+  };
+
+  //Error Handler: user's email already exist
+  if (req.body.email === getUserByEmail(req.body.email).email) {
+    return res.sendStatus(400);
+  };
+
+  const id = generateRandomString(8);//This will generate a random id for new user.
+
+  //an instance of new user info
+  const newUser = {
+    id: id,
+    email: req.body.email,
+    password: req.body.password
+  };
+
+  users[id] = newUser;//Add the new user to the users database.
+  res.cookie("user_id", newUser.id);//set cookie with the new user id.
+  
+  res.redirect("/urls");
 });
 
 //READ - Route that shows the index page where user can login.
