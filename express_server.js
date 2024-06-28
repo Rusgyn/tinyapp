@@ -100,8 +100,10 @@ app.get("/urls", (req, res) => {
 //GET ROUTE: PresentS the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: getUser(req.cookies["user_id"]) };
-  
-  res.render("urls_new", templateVars);
+  //Checks if user is loggedIN- create, if not - /login
+  (isUserLoggedIn(req.cookies)) ? res.render("urls_new", templateVars) : res.redirect("/login");
+
+  return;
 });
 
 //POST ROUTE: to receive the Form Submission.
