@@ -99,7 +99,9 @@ app.get("/urls", (req, res) => {
 
 //GET ROUTE: PresentS the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
+
   const templateVars = { user: getUser(req.cookies["user_id"]) };
+
   //Checks if user is loggedIN- create, if not - /login
   (isUserLoggedIn(req.cookies)) ? res.render("urls_new", templateVars) : res.redirect("/login");
 
@@ -118,10 +120,17 @@ app.post("/urls", (req, res) => {
   }
 
   const id = generateRandomString(8); //Obtain random id as new key
-  const newLongURL = req.body.longURL;
-  urlDatabase[id] = newLongURL; //Add the new key-value to our database
 
+  //an instance of new url
+  const newURL = {
+    longURL: req.body.longURL,
+    userID: req.cookies.user_id
+  };
+
+  urlDatabase[id] = newURL; //Add the new key-value to our url database
+  console.log(urlDatabase)
   res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
+
 });
 
 //GET ROUTE: Handles directing short URLs
