@@ -133,13 +133,13 @@ app.post("/register", (req, res) => {
  
   //Error Handler to send status if email or password is falsy.
   if (!req.body.email || !req.body.password) {
-    return res.sendStatus(400);
+    return res.status(400).send('Email or password is missing');
   };
 
   //Error Handler: user's email already exist
   const existingUser = getUserByEmail(req.body.email);
   if (existingUser && req.body.email === existingUser.email) {
-    return res.sendStatus(400);
+    return res.status(400).send('Email already exist');
   };
 
   const id = generateRandomString(8);//This will generate a random id for new user.
