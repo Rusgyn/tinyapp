@@ -126,9 +126,19 @@ app.post("/urls", (req, res) => {
 
 //GET ROUTE: Handles directing short URLs
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id]; //Access the value of given key or call as the shorter version of the URL.
-  
-  res.redirect(longURL);
+
+  for (let key in urlDatabase) {
+    if (key === req.params.id) {
+      const templateVars  = {
+        id: req.params.id,
+        longURL: urlDatabase[req.params.id]
+      };
+      const longURL = templateVars.longURL; //Access the value of given key or call as the shorter version of the URL.
+      return res.redirect(longURL);
+    }
+  }
+
+  return res.send("<html><body>The requested <b>resource</b> could not be found.</html>");  
 });
 
 //GET ROUTE: Handle to lookup it's associated longURL from the urlDatabase use id from route parameter (:id)
