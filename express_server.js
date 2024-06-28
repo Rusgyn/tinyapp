@@ -198,7 +198,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id"); //clears the value of key username in cookie.
 
-  res.redirect("/urls");
+  res.redirect("/login"); //Login page will load, after a successful logout.
 });
 
 //=====================
