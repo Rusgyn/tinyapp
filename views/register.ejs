@@ -15,36 +15,58 @@
       crossorigin="anonymous"
     />
 
-    <title>Registration - User Account</title>
+    <title>Register - TinyApp</title>
   </head>
 
   <body>
+    <header>
+      <nav class="navbar navbar-expand-md navbar-dark bg-success">    
+        <a class="navbar-brand" href="/urls">TinyApp</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNavAltMarkup"
+          aria-controls="navbarNavAltMarkup"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav mt-3 mb-3">
+            <a class="nav-item nav-link" href="/urls">My URLs</a>
+            <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+            <a class="nav-item nav-link" href="/Register">Register</a>
+            <a class="nav-item nav-link" href="/login">Login</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
     <main style="margin: 1em;">
-      <h3>Register New Account</h3>
-      <form required class="form-inline" action="/register" method="POST"> 
+      <h3>Create new Account </h3>
+      </br>
+      <form method="POST">
         <div class="form-group mb-2">
-          <!-- Email Field -->
-          <label for="email">Email address:</label>
-          <!--name attribute is important, it identifies data we are sending -->
+          <label for="email">Email Address:</label>
           <input
             class="form-control"
             type="email"
             name="email"
-            placeholder="abc123@example.com"
+            placeholder="sample@sample.com"
             style="width: 300px; margin: 1em"
           />
-          <!-- Password Field -->
-          <label for="password">Password:</label>
-          <!--name attribute is important, it identifies data we are sending -->
+          <label for="password">Password: </label>
           <input
             class="form-control"
             type="password"
             name="password"
-            placeholder="alphanumeric password"
+            placeholder="password"
             style="width: 300px; margin: 1em"
           />
-
-          <button type="submit" class="btn btn-primary">Submit</button> <!-- The type attribute tells how the button behaves. Type submit will submit the form date to the server. -->
+          </br>
+          <button type="submit" class="btn btn-primary">Register</button>
         </div>
       </form>
     </main>
