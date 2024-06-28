@@ -91,10 +91,24 @@ const getUserNamePassword = (email, password) => {
 const isUserLoggedIn = (reqCookies) => {
   return (reqCookies.user_id ? true : false);
 };
+//To get the urls associated with the user
+const urlsForUser = (userId) => {
+  let urls = {}
+  for (const [urlId, url] of Object.entries(urlDatabase)) {   
+    //urlId = is the key; url = is the value {longURL:.., userID:..}
+    console.log(url)
+    if (userId === url.userID) {
+      urls[urlId] = url
+    }
+  }
+
+  return urls;
+};
+urlsForUser("userRandomID");
 
 //GET ROUTE: Load the Index Page
 app.get("/", (req, res) => {
-  res.render("urls_welcome")
+  res.render("welcome")
   //res.redirect("/urls");
 });
 
@@ -104,13 +118,13 @@ app.get("/urls", (req, res) => {
   if (isUserLoggedIn(req.cookies)) {
     const templateVars = {
       user: getUser(req.cookies["user_id"]),
-      urls: urlDatabase
+      urls: urlsForUser(req.cookies["user_id"])
     };
 
     return res.render("urls_index", templateVars);
   }
   
-  return res.render("urls_reqDeclined");
+  return res.render("reqDeclined");
 });
 
 //GET ROUTE: PresentS the Form Submission to create new URL to the end-user
