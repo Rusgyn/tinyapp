@@ -113,6 +113,10 @@ app.post("/urls", (req, res) => {
     return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
   }
 
+  if (!isUserLoggedIn(req.cookies)) {
+    return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>This requires authentication, you must login and start a new request.</html>");
+  }
+
   const id = generateRandomString(8); //Obtain random id as new key
   const newLongURL = req.body.longURL;
   urlDatabase[id] = newLongURL; //Add the new key-value to our database
