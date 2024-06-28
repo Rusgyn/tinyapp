@@ -153,6 +153,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //GET ROUTE: Shows the registration page
 app.get("/register", (req, res) => {
+  if(req.cookies) return res.redirect("/urls");
   res.render("register");
 });
 
@@ -187,6 +188,7 @@ app.post("/register", (req, res) => {
 
 //GET ROUTE: Shows the index page where user can login.
 app.get("/login", (req, res) => {
+  if (req.cookies) return res.redirect("/urls");
   res.render("login");
 });
 
