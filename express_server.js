@@ -159,13 +159,14 @@ app.post("/register", (req, res) => {
 
 //READ - Route that shows the index page where user can login.
 app.get("/login", (req, res) => {
-  res.render("/urls");
-})
+  res.render("login");
+});
 
 //CREATE - POST route that handles login.
 app.post("/login", (req, res) => {
+  const user = getUserByEmail(req.body.email);
   //Setting a cookie named username
-  res.cookie('username', req.body.username);
+  res.cookie("user_id", user.id);
   
   res.redirect("/urls"); //After successful login, redirect the client back to the urls page
 });
