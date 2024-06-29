@@ -181,10 +181,9 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[req.params.id].longURL
   };
 
-  (isUserLoggedIn(req.cookies)) ? res.render("urls_show", templateVars) : res.render("reqDeclined");
+  isUserLoggedIn(req.cookies) && (urlsForUser(req.cookies).userID) ? res.render("urls_show", templateVars) : res.render("reqDeclined");
 
   return;
-  //res.render("urls_show", templateVars); //use res.render() to pass the data to urls_show template.
 });
 
 //POST ROUTE: Handles the updating/editing a URL resource
