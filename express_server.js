@@ -157,7 +157,7 @@ app.post("/urls", (req, res) => {
   };
 
   urlDatabase[id] = newURL; //Add the new key-value to our url database
-  console.log(urlDatabase)
+  // console.log(urlDatabase)
   res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
@@ -180,35 +180,112 @@ app.get("/u/:id", (req, res) => {
 
 //GET ROUTE: Handle to lookup it's associated longURL from the urlDatabase use id from route parameter (:id)
 app.get("/urls/:id", (req, res) => {
-  const templateVars = {
-    user: getUser(req.cookies["user_id"]),
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL
-  };
 
-  isUserLoggedIn(req.cookies) && (urlsForUser(req.cookies).userID) ? res.render("urls_show", templateVars) : res.render("reqDeclined");
+  const id = req.params.id;
+  let urlKeys = Object.keys(urlDatabase); //returns a new array of keys
 
-  return;
+  //Case: User is loggedIn
+  if(isUserLoggedIn(req.cookies)) {
+    console.log(req.cookies);//XXX REMOVED LATER
+    //Checks if short URL id exist of not
+    if (!urlKeys.includes(id)) {
+      return res.send("LINE 184: not existing"); //status code 400
+    }
+    
+    const user = getUser(req.cookies["user_id"]); //Get the loggedIn user
+    const urlOwner = urlsForUser(req.cookies.user_id)[id]; //Checks if the url belong to the current loggedIn user.
+
+    if (urlOwner) {
+      const templateVars = {
+        user: user,
+        id: id,
+        longURL: urlOwner.longURL //XXX urlDatabase[req.params.id].longURL
+      };
+      return res.render("urls_show", templateVars);
+    } else {
+      return res.send("<html><body>LINE 200 Unauthorized. You do not own this url.</html>\n")
+    }
+  } else { //Case: User not loggedIn
+    console.log(req.params.id); //XXX
+    return res.send("<html><body>LINE 204. Please login.</html>\n")
+  }
+
+  // isUserLoggedIn(req.cookies) && urlOwner ? res.render("urls_show", templateVars) : res.send("ERROR LINE 195"); //status code 403
+
+  // return;
 });
 
 //POST ROUTE: Handles the updating/editing a URL resource
 app.post("/urls/:id", (req, res) => {
-  //Error Handling. Shows error message if longURL is not define or empty.
-  if (req.body.longURL === "" || req.body.longURL === undefined) {
-    return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+
+  if (isUserLoggedIn(req.cookies)) {
+    //Error Handling. Shows error message if longURL is not define or empty.
+    if (req.body.longURL === "" || req.body.longURL === undefined) {
+      return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+    }
+
+    const url = urlsForUser(req.cookies.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
+  
+    if (url) {
+      //function that will check HTTP or HTTPS protocol
+      const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
+      
+      url.longURL = withHttp(req.body.longURL);
+      urlDatabase[req.params.id] = url;
+
+      return res.redirect(`/urls`);
+    } else {
+      return res.send("<html><body><t><b>LINE 238 Request Declined</b></t>.<br><br>You did not own this URL</html>");
+    };
+  } else {
+    return res.send("<html><body><t><b>LINE 241 Please login</b></t>.<br><br>you cannot edit.</html>");
   }
 
-  urlDatabase[req.params.id].longURL = req.body.longURL; //Update the value as per the key (id)
+  // if(!isUserLoggedIn(req.cookies)) {
+  //   return res.status(403).send("<html><body> LINE 209 LOGIN PLEASE. You do not own this url.</html>\n");
+  // }
 
-  res.redirect("/urls"); //redirect the client back to its homepage.
 });
+  
+
+
+//   const id = req.params.id;
+//   let urlKeys = Object.keys(urlDatabase); //returns a new array of keys
+
+//   if (!urlKeys.includes(id)) {
+//     return res.send("Nope"); //status code 400
+//   }
+
+ 
+//   urlDatabase[req.params.id].longURL = req.body.longURL; //Update the value as per the key (id)
+
+//   res.redirect("/urls"); //redirect the client back to its homepage.
+// });
 
 //POST ROUTE: Handles deleting a URL resource.
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-
-  res.redirect("/urls"); //After the resource has been deleted, redirect the client back to the urls_index page
+  const id = req.params.id;
+  //Case: User is loggedIn
+  if(isUserLoggedIn(req.cookies)) {
+    const url = urlsForUser(req.cookies.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
+    //The URL belongs to the current user
+    if (url) {
+      delete urlDatabase[id];
+      return res.redirect('/urls');
+    } else { //The URL trying to delete is not own by the current user.
+      return res.status(403).send("<html><body>LINE 276 DElete. You do not own this url.</html>\n");
+    }
+  } else { //Case: User is not loggedIN
+    return res.send("<html><body>LINE 279 Delete. You have to login first.</html>\n");
+  }
 });
+
+//   isUserLoggedIn(req.cookies) && (urlsForUser(req.cookies).userID) ? res.render("urls_show", templateVars) : res.render("reqDeclined");
+
+//   delete urlDatabase[req.params.id];
+
+//   res.redirect("/urls"); //After the resource has been deleted, redirect the client back to the urls_index page
+// });
 
 //GET ROUTE: Shows the registration page
 app.get("/register", (req, res) => {
