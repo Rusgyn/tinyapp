@@ -46,12 +46,11 @@ const urlDatabase = {
   }
 };
 
-//HELPER FUNCTIONS
-//To get the user by id
+//HELPER FUNCTIONS.To get the user by id
 const getUser = (userId) => {
   return users[userId];
 };
-//To get the user object by email
+//HELPER FUNCTIONS.To get the user object by email
 const getUserByEmail = (email) => {
   let usersEmail = "";
 
@@ -63,7 +62,7 @@ const getUserByEmail = (email) => {
     }
   }
 };
-//To get the user object by password
+//HELPER FUNCTIONS. To get the user object by password
 const getUserByPassword = (password) => {
   let usersPassword = "";
   //Iterate the key properties of users object
@@ -74,7 +73,7 @@ const getUserByPassword = (password) => {
     }
   }
 };
-//To get username and password
+//HELPER FUNCTIONS. To get username and password
 const getUserNamePassword = (email, password) => {
   let usersEmail = "";
   let usersPassword = "";
@@ -87,31 +86,26 @@ const getUserNamePassword = (email, password) => {
     }
   }
 };
-//To check if user is logged in, return Boolean.
+//HELPER FUNCTIONS. To check if user is logged in, return Boolean.
 const isUserLoggedIn = (reqCookies) => {
   return (reqCookies.user_id ? true : false);
 };
-//To get the urls associated with the user
+//HELPER FUNCTIONS. To get the urls associated with the user
 const urlsForUser = (userId) => {
-  let urls = {}
+  let urls = {};
   for (const [urlId, url] of Object.entries(urlDatabase)) {   
     //urlId = is the key; url = is the value {longURL:.., userID:..}
-    console.log(url)
     if (userId === url.userID) {
-      urls[urlId] = url
+      urls[urlId] = url;
     }
   }
-
   return urls;
 };
-urlsForUser("userRandomID");
 
 //GET ROUTE: Load the Index Page
 app.get("/", (req, res) => {
   isUserLoggedIn(req.cookies) ? res.redirect("/urls") : res.render("welcome");
   return;
-  // res.render("welcome")
-  //res.redirect("/urls");
 });
 
 //GET ROUTE: Shows the "/urls"
@@ -160,7 +154,6 @@ app.post("/urls", (req, res) => {
   urlDatabase[id] = newURL; //Add the new key-value to our url database
   console.log(urlDatabase)
   res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
-
 });
 
 //GET ROUTE: Handles directing short URLs
