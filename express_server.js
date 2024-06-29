@@ -25,8 +25,8 @@ const users = {
   },
   user2RandomID: {
     id: "user2RandomID",
-    email: "[email protected]",
-    password: "dishwasher-funk",
+    email: "1@1.com",
+    password: "123",
   },
 };
 
@@ -43,8 +43,13 @@ const urlDatabase = {
   test: {
     longURL: "http://www.well.ca",
     userID: "userRandomID"
+  },
+  samp1: {
+    longURL: "http://www.yahoo.com",
+    userID: "user2RandomID"
   }
 };
+
 
 //HELPER FUNCTIONS.To get the user by id
 const getUser = (userId) => {
