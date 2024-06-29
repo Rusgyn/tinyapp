@@ -108,7 +108,9 @@ urlsForUser("userRandomID");
 
 //GET ROUTE: Load the Index Page
 app.get("/", (req, res) => {
-  res.render("welcome")
+  isUserLoggedIn(req.cookies) ? res.redirect("/urls") : res.render("welcome");
+  return;
+  // res.render("welcome")
   //res.redirect("/urls");
 });
 
@@ -186,7 +188,7 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[req.params.id].longURL
   };
 
-  (isUserLoggedIn(req.cookies)) ? res.render("urls_show", templateVars) : res.redirect("/login");
+  (isUserLoggedIn(req.cookies)) ? res.render("urls_show", templateVars) : res.render("reqDeclined");
 
   return;
   //res.render("urls_show", templateVars); //use res.render() to pass the data to urls_show template.
