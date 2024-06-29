@@ -30,7 +30,7 @@ const users = {
   },
 };
 
-//URL database.
+//URL database
 const urlDatabase = {
   b2xVn2: {
     longURL: "http://www.lighthouselabs.ca",
@@ -50,11 +50,11 @@ const urlDatabase = {
   }
 };
 
-
 //HELPER FUNCTIONS.To get the user by id
 const getUser = (userId) => {
   return users[userId];
 };
+
 //HELPER FUNCTIONS.To get the user object by email
 const getUserByEmail = (email) => {
   let usersEmail = "";
@@ -67,17 +67,7 @@ const getUserByEmail = (email) => {
     }
   }
 };
-//HELPER FUNCTIONS. To get the user object by password
-const getUserByPassword = (password) => {
-  let usersPassword = "";
-  //Iterate the key properties of users object
-  for (let key in users) {
-    usersPassword = users[key].password;
-    if (password === usersPassword) {
-      return users[key]; //return the user's object
-    }
-  }
-};
+
 //HELPER FUNCTIONS. To get username and password
 const getUserNamePassword = (email, password) => {
   let usersEmail = "";
@@ -91,10 +81,12 @@ const getUserNamePassword = (email, password) => {
     }
   }
 };
+
 //HELPER FUNCTIONS. To check if user is logged in, return Boolean.
 const isUserLoggedIn = (reqCookies) => {
   return (reqCookies.user_id ? true : false);
 };
+
 //HELPER FUNCTIONS. To get the urls associated with the user
 const urlsForUser = (userId) => {
   let urls = {};
@@ -210,9 +202,6 @@ app.get("/urls/:id", (req, res) => {
     return res.send("<html><body>LINE 204. Please login.</html>\n")
   }
 
-  // isUserLoggedIn(req.cookies) && urlOwner ? res.render("urls_show", templateVars) : res.send("ERROR LINE 195"); //status code 403
-
-  // return;
 });
 
 //POST ROUTE: Handles the updating/editing a URL resource
@@ -241,27 +230,8 @@ app.post("/urls/:id", (req, res) => {
     return res.send("<html><body><t><b>LINE 241 Please login</b></t>.<br><br>you cannot edit.</html>");
   }
 
-  // if(!isUserLoggedIn(req.cookies)) {
-  //   return res.status(403).send("<html><body> LINE 209 LOGIN PLEASE. You do not own this url.</html>\n");
-  // }
-
 });
-  
-
-
-//   const id = req.params.id;
-//   let urlKeys = Object.keys(urlDatabase); //returns a new array of keys
-
-//   if (!urlKeys.includes(id)) {
-//     return res.send("Nope"); //status code 400
-//   }
-
  
-//   urlDatabase[req.params.id].longURL = req.body.longURL; //Update the value as per the key (id)
-
-//   res.redirect("/urls"); //redirect the client back to its homepage.
-// });
-
 //POST ROUTE: Handles deleting a URL resource.
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
@@ -279,13 +249,6 @@ app.post("/urls/:id/delete", (req, res) => {
     return res.send("<html><body>LINE 279 Delete. You have to login first.</html>\n");
   }
 });
-
-//   isUserLoggedIn(req.cookies) && (urlsForUser(req.cookies).userID) ? res.render("urls_show", templateVars) : res.render("reqDeclined");
-
-//   delete urlDatabase[req.params.id];
-
-//   res.redirect("/urls"); //After the resource has been deleted, redirect the client back to the urls_index page
-// });
 
 //GET ROUTE: Shows the registration page
 app.get("/register", (req, res) => {
