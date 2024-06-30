@@ -2,16 +2,15 @@ const express = require("express"); // use the express module
 const app = express(); // Define app as instance of the express module.
 const PORT = 8080;
 const cookieSession = require("cookie-session"); //https://github.com/expressjs/cookie-session
-// XXXconst cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs'); //convert the passwords to more secure
-const getUserByEmail = require('./helpers');//imported the helper functions
+const { generateRandomString, getUserByEmail, getUser, isUserLoggedIn, urlsForUser } = require('./helpers');//import the helper functions using modules
+const { users, urlDatabase } = require('./database/dBaseHelpers'); //import the databases.
 
 //express built-in function that convert the request body from a Buffer into a string.
 app.use(express.urlencoded({ extended: true }));
-//Express middleware that facilitates working with cookies.
-// XXXapp.use(cookieParser());
 //Tells the express app to use ejs as its templating engine.
 app.set('view engine', 'ejs');
+//Express middleware that facilitates working with cookies.
 app.use(cookieSession({
   name: 'session',
   keys: ['secret!'],
@@ -20,82 +19,6 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 
 }));
 
-//Function that generates random alphanumeric characters.
-const generateRandomString = (length) => {
-  return Math.random().toString(36).substring(2, length);
-};
-
-//PREDEFINE DATABASE
-//users database
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "a@a.com",
-    password: "a123",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "1@1.com",
-    password: "123",
-  },
-};
-
-//URL database
-const urlDatabase = {
-  b2xVn2: {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "userRandomID"
-  },
-  "9sm5xk": {
-    longURL: "http://www.google.com",
-    userID: "user2RandomID"
-  },
-  test: {
-    longURL: "http://www.well.ca",
-    userID: "userRandomID"
-  },
-  samp1: {
-    longURL: "http://www.yahoo.com",
-    userID: "user2RandomID"
-  }
-};
-
-//HELPER FUNCTIONS.To get the user by id
-const getUser = (userId) => {
-  return users[userId];
-};
-
-//HELPER FUNCTIONS. To get username and password
-const getUserNamePassword = (email, password) => {
-  let usersEmail = "";
-  let usersPassword = "";
-  //Iterate the key properties of users object
-  for (let key in users) {
-    usersEmail = users[key].email;
-    usersPassword = users[key].password;
-
-    if (email === usersEmail && password === usersPassword) {
-      return users[key];
-    }
-  }
-};
-
-//HELPER FUNCTIONS. To check if user is logged in, return Boolean.
-const isUserLoggedIn = (reqSession) => {
-  return (reqSession.user_id ? true : false);
-};
-
-//HELPER FUNCTIONS. To get the urls associated with the user
-const urlsForUser = (userId) => {
-  let urls = {};
-  for (const [urlId, url] of Object.entries(urlDatabase)) {   
-    //urlId = is the key; url = is the value {longURL:.., userID:..}
-    if (userId === url.userID) {
-      urls[urlId] = url;
-    }
-  }
-  return urls;
-};
 
 //GET ROUTE: Load the Index Page
 app.get("/", (req, res) => {
