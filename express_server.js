@@ -30,48 +30,56 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
 
   if (isUserLoggedIn(req.session)) {
+    const user = getUser(req.session.user_id);
     const templateVars = {
-      user: getUser(req.session["user_id"]),
-      urls: urlsForUser(req.session["user_id"])
+      user: user,
+      urls: urlsForUser(req.session.user_id)
     };
-
     return res.render("urls_index", templateVars);
+  } else {
+    return res.render("reqDeclined");
   }
-  
-  return res.render("reqDeclined");
+
 });
 
 //GET ROUTE: PresentS the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: getUser(req.session["user_id"]) };
-  //Checks if user is loggedIN- create, if not - /login
-  (isUserLoggedIn(req.session)) ? res.render("urls_new", templateVars) : res.redirect("/login");
 
-  return;
+  if (isUserLoggedIn(req.session)) {
+    console.log("GET URLS/NEW", req.session);
+    const templateVars = { user: getUser(req.session.user_id) }; //["user_id"]
+    console.log("LINE 110 GET URLS/NEW TEMPLATEVARS", templateVars)
+    return res.render("urls_new", templateVars)
+  } else {
+    return res.redirect("/login");
+  }
 });
 
-//POST ROUTE: to receive the Form Submission.
+//POST ROUTE: to receive the Create Form Submission.
 app.post("/urls", (req, res) => {
-  //Error Handling. Shows error message if longURL is not define or empty.
-  if (req.body.longURL === "" || req.body.longURL === undefined) {
-    return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+
+  if(isUserLoggedIn(req.session)) {
+    //Error Handling. Shows error message if longURL is not define or empty.
+    if (req.body.longURL === "" || req.body.longURL === undefined) {
+      return res.status(403).send("<html><body><t><b>POST /URLS Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+    }
+
+    const id = generateRandomString(8); //Obtain random id as new key
+    //function that will check HTTP or HTTPS protocol
+    const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
+    //an instance of new url
+    const newURL = {
+      longURL: withHttp(req.body.longURL),
+      userID: req.session.user_id
+    };
+
+    urlDatabase[id] = newURL; //Add the new key-value to our url database
+    // console.log(urlDatabase)
+    return res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
+  } else {
+    return res.status(403).send("<html><body><t><b>POST /URLS Request Declined</b></t>.<br><br>This requires authentication, you must login and start a new request.</html>");
   }
 
-  if (!isUserLoggedIn(req.session)) {
-    return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>This requires authentication, you must login and start a new request.</html>");
-  }
-
-  const id = generateRandomString(8); //Obtain random id as new key
-
-  //an instance of new url
-  const newURL = {
-    longURL: req.body.longURL,
-    userID: req.session.user_id
-  };
-
-  urlDatabase[id] = newURL; //Add the new key-value to our url database
-  // console.log(urlDatabase)
-  res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
 });
 
 //GET ROUTE: Handles directing short URLs
@@ -95,15 +103,16 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls/:id", (req, res) => {
 
   const id = req.params.id;
+
   let urlKeys = Object.keys(urlDatabase); //returns a new array of keys
+  //Checks if short URL id exist of not
+  if (!urlKeys.includes(id)) {
+    return res.send("LINE 184: not existing"); //status code 400
+  }
 
   //Case: User is loggedIn
   if(isUserLoggedIn(req.session)) {
     console.log(req.session);//XXX REMOVED LATER
-    //Checks if short URL id exist of not
-    if (!urlKeys.includes(id)) {
-      return res.send("LINE 184: not existing"); //status code 400
-    }
     
     const user = getUser(req.session["user_id"]); //Get the loggedIn user
     const urlOwner = urlsForUser(req.session.user_id)[id]; //Checks if the url belong to the current loggedIn user.
@@ -116,11 +125,11 @@ app.get("/urls/:id", (req, res) => {
       };
       return res.render("urls_show", templateVars);
     } else {
-      return res.send("<html><body>LINE 200 Unauthorized. You do not own this url.</html>\n")
+      return res.send("<html><body>GET urls/:id Unauthorized. You do not own this url.</html>\n")
     }
   } else { //Case: User not loggedIn
-    console.log(req.params.id); //XXX
-    return res.send("<html><body>LINE 204. Please login.</html>\n")
+    console.log("LINE 190 GET urls/:id", req.params.id); //XXX
+    return res.send("<html><body>GET urls/:id. Please login.</html>\n")
   }
 
 });
@@ -131,7 +140,7 @@ app.post("/urls/:id", (req, res) => {
   if (isUserLoggedIn(req.session)) {
     //Error Handling. Shows error message if longURL is not define or empty.
     if (req.body.longURL === "" || req.body.longURL === undefined) {
-      return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+      return res.status(403).send("<html><body><t><b>POST urls/id Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
     }
 
     const url = urlsForUser(req.session.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
@@ -145,10 +154,10 @@ app.post("/urls/:id", (req, res) => {
 
       return res.redirect(`/urls`);
     } else {
-      return res.send("<html><body><t><b>LINE 238 Request Declined</b></t>.<br><br>You did not own this URL</html>");
+      return res.send("<html><body><t><b>LINE 216 POST urls/id Request Declined</b></t>.<br><br>You did not own this URL</html>");
     };
   } else {
-    return res.send("<html><body><t><b>LINE 241 Please login</b></t>.<br><br>you cannot edit.</html>");
+    return res.send("<html><body><t><b>LINE 219 POST urls/id Please login</b></t>.<br><br>you cannot edit.</html>");
   }
 
 });
@@ -256,7 +265,7 @@ app.post("/login", (req, res) => {
 
 //POST ROUTE: handles logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id"); //clears the value of key username in cookie.
+  req.session = null; //clears the value of key username in cookie.
 
   res.redirect("/login"); //Login page will load, after a successful logout.
 });
