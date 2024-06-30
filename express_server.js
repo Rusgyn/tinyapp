@@ -2,7 +2,7 @@ const express = require("express"); // use the express module
 const app = express(); // Define app as instance of the express module.
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs'); //convert the passwords to more secure
 
 //express built-in function that convert the request body from a Buffer into a string.
 app.use(express.urlencoded({ extended: true }));
@@ -319,6 +319,7 @@ app.post("/login", (req, res) => {
   if (!email || !password) return res.status(400).send('Email or password is missing');
   
   if(existingUser) {
+    //checking the password
     if(bcrypt.compareSync(password, existingUser.password)) {
       //Setting a cookie names user_id
       res.cookie("user_id", existingUser.id);
