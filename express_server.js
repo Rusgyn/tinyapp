@@ -4,7 +4,7 @@ const PORT = 8080;
 const cookieSession = require("cookie-session"); //https://github.com/expressjs/cookie-session
 // XXXconst cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs'); //convert the passwords to more secure
-
+const getUserByEmail = require('./helpers');//imported the helper functions
 
 //express built-in function that convert the request body from a Buffer into a string.
 app.use(express.urlencoded({ extended: true }));
@@ -63,19 +63,6 @@ const urlDatabase = {
 //HELPER FUNCTIONS.To get the user by id
 const getUser = (userId) => {
   return users[userId];
-};
-
-//HELPER FUNCTIONS.To get the user object by email
-const getUserByEmail = (email) => {
-  let usersEmail = "";
-
-  //Iterate the key properties of users object
-  for (let key in users) {
-    usersEmail = (users[key].email);
-    if (email === usersEmail) {
-      return users[key]; //return the user's object
-    }
-  }
 };
 
 //HELPER FUNCTIONS. To get username and password
@@ -286,7 +273,7 @@ app.post("/register", (req, res) => {
   }
 
   //Error Handler: user's email already exist
-  const existingUser = getUserByEmail(email);
+  const existingUser = getUserByEmail(email, users);
   if (existingUser && email === existingUser.email) {
     return res.status(400).send('Email already exist');
   }
@@ -323,7 +310,7 @@ app.post("/login", (req, res) => {
 
   const email = req.body.email;
   const password = req.body.password;
-  const existingUser = getUserByEmail(email);
+  const existingUser = getUserByEmail(email, users);
 
   //Error Handler to send status if email or password is empty.
   if (!email || !password) return res.status(400).send('Email or password is missing');
