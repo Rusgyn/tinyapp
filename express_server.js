@@ -94,8 +94,8 @@ const getUserNamePassword = (email, password) => {
 };
 
 //HELPER FUNCTIONS. To check if user is logged in, return Boolean.
-const isUserLoggedIn = (reqCookies) => {
-  return (reqCookies.user_id ? true : false);
+const isUserLoggedIn = (reqSession) => {
+  return (reqSession.user_id ? true : false);
 };
 
 //HELPER FUNCTIONS. To get the urls associated with the user
@@ -112,17 +112,17 @@ const urlsForUser = (userId) => {
 
 //GET ROUTE: Load the Index Page
 app.get("/", (req, res) => {
-  isUserLoggedIn(req.cookies) ? res.redirect("/urls") : res.render("welcome");
+  isUserLoggedIn(req.session) ? res.redirect("/urls") : res.render("welcome");
   return;
 });
 
 //GET ROUTE: Shows the "/urls"
 app.get("/urls", (req, res) => {
 
-  if (isUserLoggedIn(req.cookies)) {
+  if (isUserLoggedIn(req.session)) {
     const templateVars = {
-      user: getUser(req.cookies["user_id"]),
-      urls: urlsForUser(req.cookies["user_id"])
+      user: getUser(req.session["user_id"]),
+      urls: urlsForUser(req.session["user_id"])
     };
 
     return res.render("urls_index", templateVars);
@@ -133,9 +133,9 @@ app.get("/urls", (req, res) => {
 
 //GET ROUTE: PresentS the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: getUser(req.cookies["user_id"]) };
+  const templateVars = { user: getUser(req.session["user_id"]) };
   //Checks if user is loggedIN- create, if not - /login
-  (isUserLoggedIn(req.cookies)) ? res.render("urls_new", templateVars) : res.redirect("/login");
+  (isUserLoggedIn(req.session)) ? res.render("urls_new", templateVars) : res.redirect("/login");
 
   return;
 });
@@ -147,7 +147,7 @@ app.post("/urls", (req, res) => {
     return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
   }
 
-  if (!isUserLoggedIn(req.cookies)) {
+  if (!isUserLoggedIn(req.session)) {
     return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>This requires authentication, you must login and start a new request.</html>");
   }
 
@@ -156,7 +156,7 @@ app.post("/urls", (req, res) => {
   //an instance of new url
   const newURL = {
     longURL: req.body.longURL,
-    userID: req.cookies.user_id
+    userID: req.session.user_id
   };
 
   urlDatabase[id] = newURL; //Add the new key-value to our url database
@@ -188,15 +188,15 @@ app.get("/urls/:id", (req, res) => {
   let urlKeys = Object.keys(urlDatabase); //returns a new array of keys
 
   //Case: User is loggedIn
-  if(isUserLoggedIn(req.cookies)) {
-    console.log(req.cookies);//XXX REMOVED LATER
+  if(isUserLoggedIn(req.session)) {
+    console.log(req.session);//XXX REMOVED LATER
     //Checks if short URL id exist of not
     if (!urlKeys.includes(id)) {
       return res.send("LINE 184: not existing"); //status code 400
     }
     
-    const user = getUser(req.cookies["user_id"]); //Get the loggedIn user
-    const urlOwner = urlsForUser(req.cookies.user_id)[id]; //Checks if the url belong to the current loggedIn user.
+    const user = getUser(req.session["user_id"]); //Get the loggedIn user
+    const urlOwner = urlsForUser(req.session.user_id)[id]; //Checks if the url belong to the current loggedIn user.
 
     if (urlOwner) {
       const templateVars = {
@@ -218,13 +218,13 @@ app.get("/urls/:id", (req, res) => {
 //POST ROUTE: Handles the updating/editing a URL resource
 app.post("/urls/:id", (req, res) => {
 
-  if (isUserLoggedIn(req.cookies)) {
+  if (isUserLoggedIn(req.session)) {
     //Error Handling. Shows error message if longURL is not define or empty.
     if (req.body.longURL === "" || req.body.longURL === undefined) {
       return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
     }
 
-    const url = urlsForUser(req.cookies.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
+    const url = urlsForUser(req.session.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
   
     if (url) {
       //function that will check HTTP or HTTPS protocol
@@ -247,8 +247,8 @@ app.post("/urls/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   //Case: User is loggedIn
-  if(isUserLoggedIn(req.cookies)) {
-    const url = urlsForUser(req.cookies.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
+  if(isUserLoggedIn(req.session)) {
+    const url = urlsForUser(req.session.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
     //The URL belongs to the current user
     if (url) {
       delete urlDatabase[id];
@@ -267,7 +267,7 @@ app.get("/register", (req, res) => {
     user: users,
   };
   //To check if any user is currently logged in.
-  if(isUserLoggedIn(req.cookies)) return res.redirect("/urls");
+  if(isUserLoggedIn(req.session)) return res.redirect("/urls");
 
   res.render("register", templateVars);
 });
@@ -301,7 +301,8 @@ app.post("/register", (req, res) => {
   };
 
   users[id] = newUser;//Add the new user to the users database.
-  res.cookie("user_id", newUser.id);//set cookie with the new user id.
+  req.session.user_id = newUser.id;//set session with the new user id.
+  //XXX res.cookie("user_id", newUser.id);
   
   res.redirect("/urls");
 });
@@ -312,7 +313,7 @@ app.get("/login", (req, res) => {
     user: users,
   };
   //To check if any user is currently logged in.
-  if(isUserLoggedIn(req.cookies)) return res.redirect("/urls");
+  if(isUserLoggedIn(req.session)) return res.redirect("/urls");
 
   res.render("login", templateVars);
 });
@@ -330,8 +331,8 @@ app.post("/login", (req, res) => {
   if(existingUser) {
     //checking the password
     if(bcrypt.compareSync(password, existingUser.password)) {
-      //Setting a cookie names user_id
-      res.cookie("user_id", existingUser.id);
+      //Setting a session name user_id
+      req.session.user_id = existingUser.id;
       //After successful login, redirect the client back to the urls page
       return res.redirect("/urls");
     } else {
