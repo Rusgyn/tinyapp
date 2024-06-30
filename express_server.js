@@ -1,15 +1,24 @@
 const express = require("express"); // use the express module
 const app = express(); // Define app as instance of the express module.
 const PORT = 8080;
-const cookieParser = require('cookie-parser');
+const cookieSession = require("cookie-session"); //https://github.com/expressjs/cookie-session
+// XXXconst cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs'); //convert the passwords to more secure
+
 
 //express built-in function that convert the request body from a Buffer into a string.
 app.use(express.urlencoded({ extended: true }));
 //Express middleware that facilitates working with cookies.
-app.use(cookieParser());
+// XXXapp.use(cookieParser());
 //Tells the express app to use ejs as its templating engine.
 app.set('view engine', 'ejs');
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret!'],
+  // Cookie Options
+  // 24 hours. Number representing the milliseconds from Date.now() for expiry
+  maxAge: 24 * 60 * 60 * 1000 
+}));
 
 //Function that generates random alphanumeric characters.
 const generateRandomString = (length) => {
