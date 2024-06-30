@@ -2,6 +2,7 @@ const express = require("express"); // use the express module
 const app = express(); // Define app as instance of the express module.
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 
 //express built-in function that convert the request body from a Buffer into a string.
 app.use(express.urlencoded({ extended: true }));
@@ -253,7 +254,7 @@ app.post("/urls/:id/delete", (req, res) => {
 //GET ROUTE: Shows the registration page
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: users
+    user: users,
   };
   //To check if any user is currently logged in.
   if(isUserLoggedIn(req.cookies)) return res.redirect("/urls");
@@ -263,15 +264,19 @@ app.get("/register", (req, res) => {
 
 //POST ROUTE: Handles registering new account
 app.post("/register", (req, res) => {
+
+  const email = req.body.email;
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
  
   //Error Handler to send status if email or password is falsy.
-  if (!req.body.email || !req.body.password) {
+  if (!email || !password) {
     return res.status(400).send('Email or password is missing');
   }
 
   //Error Handler: user's email already exist
-  const existingUser = getUserByEmail(req.body.email);
-  if (existingUser && req.body.email === existingUser.email) {
+  const existingUser = getUserByEmail(email);
+  if (existingUser && email === existingUser.email) {
     return res.status(400).send('Email already exist');
   }
 
@@ -280,8 +285,8 @@ app.post("/register", (req, res) => {
   //an instance of new user info
   const newUser = {
     id: id,
-    email: req.body.email,
-    password: req.body.password
+    email: email,
+    password: hashedPassword
   };
 
   users[id] = newUser;//Add the new user to the users database.
@@ -293,7 +298,7 @@ app.post("/register", (req, res) => {
 //GET ROUTE: Shows the index page where user can login.
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users
+    user: users,
   };
   //To check if any user is currently logged in.
   if(isUserLoggedIn(req.cookies)) return res.redirect("/urls");
