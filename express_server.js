@@ -267,7 +267,8 @@ app.post("/register", (req, res) => {
 
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const salt = bcrypt.genSaltSync();
+  const hashedPassword = bcrypt.hashSync(password, salt);
  
   //Error Handler to send status if email or password is falsy.
   if (!email || !password) {
