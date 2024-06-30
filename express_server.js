@@ -77,6 +77,7 @@ const getUserNamePassword = (email, password) => {
   for (let key in users) {
     usersEmail = users[key].email;
     usersPassword = users[key].password;
+
     if (email === usersEmail && password === usersPassword) {
       return users[key];
     }
@@ -310,17 +311,26 @@ app.get("/login", (req, res) => {
 //POST ROUTE: handles login.
 app.post("/login", (req, res) => {
 
-  const existingUser = getUserNamePassword(req.body.email, req.body.password);
+  const email = req.body.email;
+  const password = req.body.password;
+  const existingUser = getUserByEmail(email);
 
   //Error Handler to send status if email or password is empty.
-  if (!req.body.email || !req.body.password) return res.status(400).send('Email or password is missing');
-  //Error Handler: to check users username and password credentials.
-  if (!existingUser) return res.status(403).send("Incorrect username and/or password!");
-
-  //Setting a cookie names user_id
-  res.cookie("user_id", existingUser.id);
+  if (!email || !password) return res.status(400).send('Email or password is missing');
   
-  res.redirect("/urls"); //After successful login, redirect the client back to the urls page
+  if(existingUser) {
+    if(bcrypt.compareSync(password, existingUser.password)) {
+      //Setting a cookie names user_id
+      res.cookie("user_id", existingUser.id);
+      //After successful login, redirect the client back to the urls page
+      return res.redirect("/urls");
+    } else {
+      return res.status(403).send("LINE 331: Incorrect username and/or password!");
+    }
+  } else {
+    return res.status(403).send("LINE 334: Incorrect username and/or password!");
+  };
+  
 });
 
 //POST ROUTE: handles logout
