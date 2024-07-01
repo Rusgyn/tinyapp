@@ -1,4 +1,4 @@
-const express = require("express"); // use the express module
+const express = require("express"); //use the express module
 const app = express(); // Define app as instance of the express module.
 const PORT = 8080;
 const cookieSession = require("cookie-session"); //https://github.com/expressjs/cookie-session
@@ -16,7 +16,7 @@ app.use(cookieSession({
   keys: ['secret!'],
   // Cookie Options
   // 24 hours. Number representing the milliseconds from Date.now() for expiry
-  maxAge: 24 * 60 * 60 * 1000 
+  maxAge: 24 * 60 * 60 * 1000
 }));
 
 
@@ -29,28 +29,27 @@ app.get("/", (req, res) => {
 //GET ROUTE: Shows the "/urls"
 app.get("/urls", (req, res) => {
 
-  if (isUserLoggedIn(req.session)) {
+  if (isUserLoggedIn(req.session)) { //Case: User is logged in.
     const user = getUser(req.session.user_id);
     const templateVars = {
       user: user,
       urls: urlsForUser(req.session.user_id)
     };
     return res.render("urls_index", templateVars);
-  } else {
-    return res.render("reqDeclined");
+  } else { //Case: User not loggedIn, no permission to access the URLs
+    return res.render("reqDeclined"); //code error: 401. Authentication required.
   }
 
 });
 
-//GET ROUTE: PresentS the Form Submission to create new URL to the end-user
+//GET ROUTE: Present the Form Submission to create new URL to the end-user
 app.get("/urls/new", (req, res) => {
 
-  if (isUserLoggedIn(req.session)) {
-    console.log("GET URLS/NEW", req.session);
-    const templateVars = { user: getUser(req.session.user_id) }; //["user_id"]
-    console.log("LINE 110 GET URLS/NEW TEMPLATEVARS", templateVars)
-    return res.render("urls_new", templateVars)
-  } else {
+  if (isUserLoggedIn(req.session)) { //Case: User is logged in.
+    const templateVars = { user: getUser(req.session.user_id) };
+    
+    return res.render("urls_new", templateVars);
+  } else { //Case: User not logged in.
     return res.redirect("/login");
   }
 });
@@ -58,14 +57,14 @@ app.get("/urls/new", (req, res) => {
 //POST ROUTE: to receive the Create Form Submission.
 app.post("/urls", (req, res) => {
 
-  if(isUserLoggedIn(req.session)) {
+  if (isUserLoggedIn(req.session)) { //Case: User is logged in.
     //Error Handling. Shows error message if longURL is not define or empty.
     if (req.body.longURL === "" || req.body.longURL === undefined) {
-      return res.status(403).send("<html><body><t><b>POST /URLS Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+      return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
     }
 
     const id = generateRandomString(8); //Obtain random id as new key
-    //function that will check HTTP or HTTPS protocol
+    //A function that will check the HTTP or HTTPS protocol. Https or http is required.
     const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
     //an instance of new url
     const newURL = {
@@ -74,17 +73,16 @@ app.post("/urls", (req, res) => {
     };
 
     urlDatabase[id] = newURL; //Add the new key-value to our url database
-    // console.log(urlDatabase)
+    
     return res.redirect(`/urls/${id}`); //redirect to new route, using the random generated id as the route parameter.
-  } else {
-    return res.status(403).send("<html><body><t><b>POST /URLS Request Declined</b></t>.<br><br>This requires authentication, you must login and start a new request.</html>");
+  } else { //Case: User is not logged in.
+    return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>This requires authentication, you must login and start a new request.</html>");
   }
 
 });
 
 //GET ROUTE: Handles directing short URLs
 app.get("/u/:id", (req, res) => {
-
   for (let key in urlDatabase) {
     if (key === req.params.id) {
       const templateVars  = {
@@ -96,7 +94,7 @@ app.get("/u/:id", (req, res) => {
     }
   }
 
-  return res.send("<html><body>The requested <b>resource</b> could not be found.</html>");  
+  return res.render("reqDeclined"); //send("<html><body>The requested <b>resource</b> could not be found.</html>");
 });
 
 //GET ROUTE: Handle to lookup it's associated longURL from the urlDatabase use id from route parameter (:id)
@@ -107,29 +105,26 @@ app.get("/urls/:id", (req, res) => {
   let urlKeys = Object.keys(urlDatabase); //returns a new array of keys
   //Checks if short URL id exist of not
   if (!urlKeys.includes(id)) {
-    return res.send("LINE 184: not existing"); //status code 400
+    return res.render("reqDeclined"); //code error: 400, Bad Request. ShortURL does not exist.
   }
 
-  //Case: User is loggedIn
-  if(isUserLoggedIn(req.session)) {
-    console.log(req.session);//XXX REMOVED LATER
-    
-    const user = getUser(req.session["user_id"]); //Get the loggedIn user
+  if (isUserLoggedIn(req.session)) { //Case: User is loggedIn
+
+    const user = getUser(req.session.user_id); //Get the loggedIn user
     const urlOwner = urlsForUser(req.session.user_id)[id]; //Checks if the url belong to the current loggedIn user.
 
-    if (urlOwner) {
+    if (urlOwner) { //Case: User is logged and owns the URL
       const templateVars = {
         user: user,
         id: id,
-        longURL: urlOwner.longURL //XXX urlDatabase[req.params.id].longURL
+        longURL: urlOwner.longURL
       };
       return res.render("urls_show", templateVars);
-    } else {
-      return res.send("<html><body>GET urls/:id Unauthorized. You do not own this url.</html>\n")
+    } else { //Case: User is logged but does not own the URL
+      return res.render("reqDeclined"); //code error: 403, Forbidden. Don't have permission to access this resource.
     }
   } else { //Case: User not loggedIn
-    console.log("LINE 190 GET urls/:id", req.params.id); //XXX
-    return res.send("<html><body>GET urls/:id. Please login.</html>\n")
+    return res.render("reqDeclined"); //code error: 401. Unauthorized
   }
 
 });
@@ -137,15 +132,15 @@ app.get("/urls/:id", (req, res) => {
 //POST ROUTE: Handles the updating/editing a URL resource
 app.post("/urls/:id", (req, res) => {
 
-  if (isUserLoggedIn(req.session)) {
+  if (isUserLoggedIn(req.session)) { //Case: User is loggedIN
     //Error Handling. Shows error message if longURL is not define or empty.
     if (req.body.longURL === "" || req.body.longURL === undefined) {
-      return res.status(403).send("<html><body><t><b>POST urls/id Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
+      return res.status(403).send("<html><body><t><b>Request Declined</b></t>.<br><br>You did not enter the expected URL. Try again.</html>");
     }
 
-    const url = urlsForUser(req.session.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
+    const url = urlsForUser(req.session.user_id)[req.params.id]; //Checks if the url belongs to the current loggedIn user.
   
-    if (url) {
+    if (url) { //Case: user is loggedIn and owns the URL for the given ID
       //function that will check HTTP or HTTPS protocol
       const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
       
@@ -153,11 +148,11 @@ app.post("/urls/:id", (req, res) => {
       urlDatabase[req.params.id] = url;
 
       return res.redirect(`/urls`);
-    } else {
-      return res.send("<html><body><t><b>LINE 216 POST urls/id Request Declined</b></t>.<br><br>You did not own this URL</html>");
-    };
-  } else {
-    return res.send("<html><body><t><b>LINE 219 POST urls/id Please login</b></t>.<br><br>you cannot edit.</html>");
+    } else { //Case: user is loggedIn but does not own the URL for the given ID
+      return res.render("reqDeclined"); //send("<html><body><t><b>Request Declined</b></t>.<br><br>You don't have permission to this resource</html>");
+    }
+  } else { //Case: User not loggedIN
+    return res.render("reqDeclined"); //Restricted: User not allowed to update/edit.
   }
 
 });
@@ -165,18 +160,18 @@ app.post("/urls/:id", (req, res) => {
 //POST ROUTE: Handles deleting a URL resource.
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  //Case: User is loggedIn
-  if(isUserLoggedIn(req.session)) {
+  
+  if (isUserLoggedIn(req.session)) { //Case: User is loggedIn
     const url = urlsForUser(req.session.user_id)[req.params.id]; //Checks if the url belong to the current loggedIn user.
     //The URL belongs to the current user
-    if (url) {
+    if (url) { //Case: user is logged in and owns the URL for the given ID:
       delete urlDatabase[id];
       return res.redirect('/urls');
-    } else { //The URL trying to delete is not own by the current user.
-      return res.status(403).send("<html><body>LINE 276 DElete. You do not own this url.</html>\n");
+    } else { //Case: User is loggedIn but doesn't owns the URL for the given ID:
+      return res.status(403).send("<html><body>You do not have permission to access this resource.</html>\n");
     }
   } else { //Case: User is not loggedIN
-    return res.send("<html><body>LINE 279 Delete. You have to login first.</html>\n");
+    return res.status(401).send("<html><body>Authentication is required. Login to your TinyApp account</html>\n");
   }
 });
 
@@ -186,9 +181,10 @@ app.get("/register", (req, res) => {
     user: users,
   };
   //To check if any user is currently logged in.
-  if(isUserLoggedIn(req.session)) return res.redirect("/urls");
-
-  res.render("register", templateVars);
+  //Case: User is loggedIn
+  if (isUserLoggedIn(req.session)) return res.redirect("/urls");
+  //Case: User is not loggedIn
+  return res.render("register", templateVars);
 });
 
 //POST ROUTE: Handles registering new account
@@ -201,13 +197,13 @@ app.post("/register", (req, res) => {
  
   //Error Handler to send status if email or password is falsy.
   if (!email || !password) {
-    return res.status(400).send('Email or password is missing');
+    return res.status(400).send('<html><body><t><b>Bad Request</b></t>.<br><br>Email or password is missing.</html>');
   }
 
   //Error Handler: user's email already exist
   const existingUser = getUserByEmail(email, users);
   if (existingUser && email === existingUser.email) {
-    return res.status(400).send('Email already exist');
+    return res.status(401).send('<html><body><t><b>Bad Request</b></t>.<br><br>Email exist.</html>');
   }
 
   const id = generateRandomString(8);//This will generate a random id for new user.
@@ -219,11 +215,10 @@ app.post("/register", (req, res) => {
     password: hashedPassword
   };
 
-  users[id] = newUser;//Add the new user to the users database.
-  req.session.user_id = newUser.id;//set session with the new user id.
-  //XXX res.cookie("user_id", newUser.id);
+  users[id] = newUser; //Add the new user to the users database.
+  req.session.user_id = newUser.id; //set session with the new user id.
   
-  res.redirect("/urls");
+  return res.redirect("/urls");
 });
 
 //GET ROUTE: Shows the index page where user can login.
@@ -232,9 +227,10 @@ app.get("/login", (req, res) => {
     user: users,
   };
   //To check if any user is currently logged in.
-  if(isUserLoggedIn(req.session)) return res.redirect("/urls");
-
-  res.render("login", templateVars);
+  //Case: User is loggedIN
+  if (isUserLoggedIn(req.session)) return res.redirect("/urls");
+  //Case: User is not loggedIN
+  return res.render("login", templateVars);
 });
 
 //POST ROUTE: handles login.
@@ -247,19 +243,19 @@ app.post("/login", (req, res) => {
   //Error Handler to send status if email or password is empty.
   if (!email || !password) return res.status(400).send('Email or password is missing');
   
-  if(existingUser) {
+  if (existingUser) { //Case: Registered User
     //checking the password
-    if(bcrypt.compareSync(password, existingUser.password)) {
+    if (bcrypt.compareSync(password, existingUser.password)) {
       //Setting a session name user_id
       req.session.user_id = existingUser.id;
       //After successful login, redirect the client back to the urls page
       return res.redirect("/urls");
-    } else {
-      return res.status(403).send("LINE 331: Incorrect username and/or password!");
+    } else { //Case: User is existing but entered password and saved in database password do not match.
+      return res.status(401).send("Authentication Failed.\nIncorrect username and/or password!");
     }
   } else {
-    return res.status(403).send("LINE 334: Incorrect username and/or password!");
-  };
+    return res.status(401).send("Authentication Failed.\nIncorrect username and/or password!");
+  }
   
 });
 
@@ -270,16 +266,16 @@ app.post("/logout", (req, res) => {
   res.redirect("/login"); //Login page will load, after a successful logout.
 });
 
-//=====================
-
-//READ - Route, representing the entire urlDatabase object in json string
+//======
+//Below are predefine lines of code for TinyApp exercises.
+//GET Route, representing the entire urlDatabase object in json string
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  return res.json(urlDatabase);
 });
 
-//Route, sending HTML
+//GET Route, sending HTML
 app.get("/hello", (req, res) => {
-  res.send("<html> <body> Hello <b>World!</b> </body> </html>");
+  return res.send("<html> <body> Hello <b>World!</b> </body> </html>");
 });
 
 //Make the server listen on our define port, 8080
