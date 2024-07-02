@@ -65,11 +65,13 @@ app.post("/urls", (req, res) => {
 
     const id = generateRandomString(8); //Obtain random id as new key
     //A function that will check the HTTP or HTTPS protocol. Https or http is required.
+    let date = new Date();
     const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
     //an instance of new url
     const newURL = {
       longURL: withHttp(req.body.longURL),
-      userID: req.session.user_id
+      userID: req.session.user_id,
+      date: date.toDateString()
     };
 
     urlDatabase[id] = newURL; //Add the new key-value to our url database
@@ -143,8 +145,12 @@ app.post("/urls/:id", (req, res) => {
     if (url) { //Case: user is loggedIn and owns the URL for the given ID
       //function that will check HTTP or HTTPS protocol
       const withHttp = url => !/^https?:\/\//i.test(url) ? `http://${url}` : url;
+      //To set date of edit/update.
+      let date = new Date();
       
       url.longURL = withHttp(req.body.longURL);
+      url.date = date.toDateString();
+
       urlDatabase[req.params.id] = url;
 
       return res.redirect(`/urls`);
